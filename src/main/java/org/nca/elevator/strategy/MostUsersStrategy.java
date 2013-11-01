@@ -53,7 +53,7 @@ public class MostUsersStrategy implements ElevatorStrategy {
       }
     }
     else {
-      logger.error("Should never happen, unexpected state {}" + e.getStateAsString());
+      logger.error("Should never happen, unexpected state {}", e.getStateAsString());
       command = c.doNothing();
     }
     return command;
