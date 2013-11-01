@@ -85,6 +85,10 @@ public class Elevator implements ElevatorState, ElevatorController {
       }
       return true;
     }
+
+    public Command getLastCommand() {
+      return history.getFirst();
+    }
   }
 
   private void resetState() {
@@ -235,6 +239,11 @@ public class Elevator implements ElevatorState, ElevatorController {
   @Override
   public boolean isStale() {
     return commandHistory.isStaleSince(3);
+  }
+
+  @Override
+  public Command lastCommand() {
+    return commandHistory.getLastCommand();
   }
 
   /* (non-Javadoc)

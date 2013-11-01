@@ -30,9 +30,11 @@ public class MostUsersStrategy implements ElevatorStrategy {
       if (e.hasWaitingUserForCurrentFloor() || e.hasElevatorUserForCurrentFloor()) {
         command = c.openDoor();
       }
-      else if (e.scoreInCurrentDirection() >= e.scoreInOppositeDirection()) {
-        logger.info("score current dir {}, score opposite dir {}", e.scoreInCurrentDirection(), e
-            .scoreInOppositeDirection());
+      else if ((e.lastCommand().equals(Command.CLOSE) && e.scoreInCurrentDirection() >= e
+          .scoreInOppositeDirection())
+          || (!e.lastCommand().equals(Command.CLOSE) && e.hasUsersInCurrentDirection())) {
+        logger.info("score current dir {}, score opposite dir {}, last command {}", e
+            .scoreInCurrentDirection(), e.scoreInOppositeDirection(), e.lastCommand());
         command = c.goCurrentDirection();
       }
       else if (e.hasUsersInOppositeDirection()) {
