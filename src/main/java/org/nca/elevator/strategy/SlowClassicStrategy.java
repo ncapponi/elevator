@@ -7,8 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implements the "classic" strategy : go same direction until no request, then go opposite
- * direction.
+ * Same as "classic" strategy, but with a pause of 100ms to check that time is not very important.
  */
 public class SlowClassicStrategy extends ClassicStrategy {
 
