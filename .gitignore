@@ -8,3 +8,5 @@
 *.ear
 *.zip
 /target
+dependency-reduced-pom.xml
+
