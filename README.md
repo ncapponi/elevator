@@ -13,7 +13,7 @@ Elevator for code story
   * hostname : "localhost" or "find" to automatically retrieve ip address (needed by cloudbees)
   * port : listening port
   * strategy : name of strategy class to use, the class must be located in `org.nca.elevator.strategy` package
-   * possible values:  ̀ClassicStrategy` , `MostUsersStrategy` 
+   * possible values: ClassicStrategy , MostUsersStrategy 
 
 To test it locally you can run it through Maven : 
 ```
