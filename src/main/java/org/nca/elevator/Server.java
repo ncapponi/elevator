@@ -65,9 +65,17 @@ public class Server {
     get(new Route("/status") {
       @Override
       public Object handle(Request request, Response response) {
-        return "<p><b>Elevator</b> using strategy: " + elevator.getStrategy().getName()
-            + ".</p><p><b>State</b> :" + elevator
-            + "</p>";
+        String result = "";
+        try {
+          String entries = request.queryParams("entries");
+          int numberOfEntries = entries == null ? 1 : Integer.valueOf(entries);
+          response.type("text/html");
+          result = "<p><b>Elevator</b> using strategy: " + elevator.getStrategy().getName()
+              + ".</p>" + "<p><b>State</b> :" + elevator.getHistoryAsHtml(numberOfEntries) + "</p>";
+        } catch (Exception e) {
+          result = e.getMessage();
+        }
+        return result;
       }
     });
 

@@ -23,7 +23,7 @@ public class Elevator implements ElevatorState, ElevatorController {
   private Door doorState;
   private WaitingUsers waitingUsers;
   private ElevatorUsers elevatorUsers;
-  private CommandHistory commandHistory;
+  private StateHistory stateHistory;
 
   private ElevatorStrategy strategy;
 
@@ -59,16 +59,19 @@ public class Elevator implements ElevatorState, ElevatorController {
     OPEN, CLOSED;
   }
 
-  static class CommandHistory {
-    private LinkedList<Command> history = new LinkedList<Command>();
+  static class StateHistory {
+    private LinkedList<Command> commandsHistory = new LinkedList<Command>();
+    private LinkedList<String> stateHistory = new LinkedList<String>();
     int counter = 0;
 
-    public void add(Command command) {
-      // keep only 100 last items
-      history.addFirst(command);
+    public void add(Command command, String stateAsHtml) {
+      // keep only 1000 last items
+      commandsHistory.addFirst(command);
+      stateHistory.addFirst(stateAsHtml);
       counter++;
-      if (counter >= 100) {
-        history.removeLast();
+      if (counter >= 1000) {
+        commandsHistory.removeLast();
+        stateHistory.removeLast();
       }
     }
 
@@ -78,7 +81,7 @@ public class Elevator implements ElevatorState, ElevatorController {
         return false;
       }
       for (int i = 0; i < numberOfCommands; i++) {
-        Command command = history.get(i);
+        Command command = commandsHistory.get(i);
         if (!(command.equals(Command.NOTHING) || command.equals(Command.CLOSE))) {
           return false;
         }
@@ -87,15 +90,33 @@ public class Elevator implements ElevatorState, ElevatorController {
     }
 
     public Command getLastCommand() {
-      return history.getFirst();
+      return commandsHistory.getFirst();
     }
+
+    public String getHistoryAsHtml(int numberOfEntries) {
+      StringBuilder history = new StringBuilder();
+      history
+          .append("<table cellpadding='5' cellmargin='2'>")
+          .append(
+              "<th>Command</th><th>Floor</th><th>Direction</th><th>Door</th><th>Waiting</th><th>In Elevator</th>");
+      for (int i = 0; i < Math.min(numberOfEntries, commandsHistory.size()); i++) {
+        history.append("<tr>").append("<td>").append(commandsHistory.get(i)).append("</td>")
+            .append(stateHistory.get(i)).append("</tr>");
+      }
+      history.append("</table>");
+      return history.toString();
+    }
+  }
+
+  public String getHistoryAsHtml(int numberOfEntries) {
+    return stateHistory.getHistoryAsHtml(numberOfEntries);
   }
 
   private void resetState() {
     currentFloor = 0;
     doorState = Door.CLOSED;
     currentDirection = Direction.UP;
-    commandHistory = new CommandHistory();
+    stateHistory = new StateHistory();
     waitingUsers = new WaitingUsers();
     elevatorUsers = new ElevatorUsers();
   }
@@ -135,7 +156,7 @@ public class Elevator implements ElevatorState, ElevatorController {
   public Command nextCommand() {
     ajustDirection();
     Command command = strategy.nextCommand(this, this);
-    recordCommand(command);
+    recordState(command, getStateAsHtmlString());
     logger.info("Command: {}, state: {}", command, this);
     return command;
   }
@@ -149,8 +170,8 @@ public class Elevator implements ElevatorState, ElevatorController {
     }
   }
 
-  private void recordCommand(Command command) {
-    commandHistory.add(command);
+  private void recordState(Command command, String stateAsHtml) {
+    stateHistory.add(command, stateAsHtml);
   }
 
   /* (non-Javadoc)
@@ -238,12 +259,12 @@ public class Elevator implements ElevatorState, ElevatorController {
    */
   @Override
   public boolean isStale() {
-    return commandHistory.isStaleSince(3);
+    return stateHistory.isStaleSince(3);
   }
 
   @Override
   public Command lastCommand() {
-    return commandHistory.getLastCommand();
+    return stateHistory.getLastCommand();
   }
 
   /* (non-Javadoc)
@@ -296,6 +317,11 @@ public class Elevator implements ElevatorState, ElevatorController {
   @Override
   public String getStateAsString() {
     return toString();
+  }
+
+  private String getStateAsHtmlString() {
+    return "<td>" + currentFloor + "</td><td>" + currentDirection + "</td><td>" + doorState
+        + "</td><td>" + waitingUsers + "</td><td>" + elevatorUsers + "</td>";
   }
 
   @Override

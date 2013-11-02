@@ -140,6 +140,6 @@ class ElevatorUsers {
 
   @Override
   public String toString() {
-    return "ElevatorUsers: [" + users + "]";
+    return "In: [" + users + "]";
   }
 }

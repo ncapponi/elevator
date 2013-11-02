@@ -75,6 +75,6 @@ class WaitingUsers {
 
 	@Override
 	public String toString() {
-		return "WaitingUsers: [" + users + "]";
+    return "Waiting: [" + users + "]";
 	}
 }
