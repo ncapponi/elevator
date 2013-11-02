@@ -20,5 +20,7 @@ Elevator for code story
  * prepare: ./prepare_cloudbees.sh
  * deploy: ./deploy_to_cloudbees.sh myApp
 
-
-
+To test it locally you can run it through Maven : 
+```
+mvn exec:java -Dexec.mainClass="org.nca.elevator.Server" -Dexec.args="find 8080 ClassicStrategy"
+```
