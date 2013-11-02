@@ -29,21 +29,24 @@ public class Server {
   public static void main(String[] args) {
     System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tT] %4$s: %5$s %n");
     try {
+      // Default values
       String ipAddress = "localhost";
       int port = 8080;
-      String strategyClass = "org.nca.elevator.ClassicStrategy";
+      String strategyClass = "ClassicStrategy";
+
       if (args.length == 3) {
         ipAddress = args[0];
         if (ipAddress.equals("find")) {
           ipAddress = InetAddress.getLocalHost().getHostAddress();
         }
         port = Integer.valueOf(args[1]);
-        strategyClass = "org.nca.elevator.strategy." + args[2];
+        strategyClass = args[2];
       }
-      logger.info("Launch Elevator Server on address {}, port {}, using strategy {}", ipAddress,
-          port, strategyClass);
+      strategyClass = "org.nca.elevator.strategy." + strategyClass;
+      logger.info("Launch Elevator Server on address {}, port {}, using strategy {}", ipAddress, port, strategyClass);
       startElevator(ipAddress, port, strategyClass);
     } catch (Exception e) {
+      e.printStackTrace();
       logger.error("Unable to start elevator", e);
     }
   }
