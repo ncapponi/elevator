@@ -15,12 +15,12 @@ Elevator for code story
   * strategy : name of strategy class to use, the class must be located in org.nca.elevator.package
    * possible values: ClassicStrategy, MostUsersStrategy 
 
-* deploy to cloudbees
- * create cloudbees app: bees create myApp
- * prepare: ./prepare_cloudbees.sh
- * deploy: ./deploy_to_cloudbees.sh myApp
-
 To test it locally you can run it through Maven : 
 ```
 mvn exec:java -Dexec.mainClass="org.nca.elevator.Server" -Dexec.args="find 8080 ClassicStrategy"
 ```
+
+* deploy to cloudbees
+ * create cloudbees app: bees create myApp
+ * deploy: ./deploy_to_cloudbees.sh myApp
+
