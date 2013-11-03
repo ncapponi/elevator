@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 class ElevatorUsers {
 
+  static final int NULL_SCORE = -1;
+
   static final Logger logger = LoggerFactory.getLogger(ElevatorUsers.class);
 
   private List<ElevatorUser> users = new ArrayList<ElevatorUser>();
@@ -63,15 +65,20 @@ class ElevatorUsers {
 
   /**
    * Remove any user that matches, always using best match first.
+   *
+   * @return the final score of the removed user, or {@code NULL_SCORE} if no user could be find to
+   *         be removed
    */
-  public boolean userExited(int exitFloor) {
-    boolean removed = removeUserAtFloor(exitFloor, ExitReason.WANT)
-        || removeUserAtFloor(exitFloor, ExitReason.CAN) || removeUserAtFloor(exitFloor, ExitReason.COULD);
-    if (!removed) {
-      logger.warn("Unable to select any user to remove on user exit event, at exit floor {}",
+  public int userExited(int exitFloor) {
+    int score = removeUserAtFloor(exitFloor, ExitReason.WANT);
+    score = (score == NULL_SCORE) ? removeUserAtFloor(exitFloor, ExitReason.CAN) : score;
+    score = (score == NULL_SCORE) ? removeUserAtFloor(exitFloor, ExitReason.COULD) : score;
+
+    if (score == NULL_SCORE) {
+      logger.error("Unable to select any user to remove on user exit event, at exit floor {}",
           exitFloor);
     }
-    return removed;
+    return score;
   }
 
   /**
@@ -83,18 +90,26 @@ class ElevatorUsers {
     }
   }
 
-  private boolean removeUserAtFloor(int exitFloor, ExitReason reason) {
+  /**
+   * Remove an elevator user matching the provided exit floor and exit reason, and return its final
+   * score.
+   *
+   * @return the final score of the removed user, or {@code NULL_SCORE} if no user could be find to
+   *         be removed
+   */
+  private int removeUserAtFloor(int exitFloor, ExitReason reason) {
     Iterator<ElevatorUser> iterator = users.iterator();
     while (iterator.hasNext()) {
       ElevatorUser user = iterator.next();
       if (shouldRemoveUserAtFloor(user, exitFloor, reason)) {
         iterator.remove();
-        logger.info("An user has exited at floor {}, score {}, exit reason {}, removed user: {}",
-            exitFloor, user.getFinalScore(), reason, user);
-        return true;
+        int finalScore = user.getFinalScore();
+        logger.info("User has exited at floor {}, score {}, exit reason {}, removed user: {}",
+            exitFloor, finalScore, reason, user);
+        return finalScore;
       }
     }
-    return false;
+    return NULL_SCORE;
   }
 
   private boolean shouldRemoveUserAtFloor(ElevatorUser user, int exitFloor, ExitReason reason) {

@@ -1,5 +1,6 @@
 package org.nca.elevator;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.nca.elevator.strategy.ElevatorStrategy;
@@ -8,15 +9,9 @@ import org.slf4j.LoggerFactory;
 
 public class Elevator implements ElevatorState, ElevatorController {
 
-  static final Logger logger = LoggerFactory.getLogger(Elevator.class);
-
-  public static final String NOTHING = "NOTHING";
-  public static final String UP = "UP";
-  public static final String DOWN = "DOWN";
-  public static final String OPEN = "OPEN";
-  public static final String CLOSE = "CLOSE";
-
   public static final int MAX_FLOOR = 5;
+
+  static final Logger logger = LoggerFactory.getLogger(Elevator.class);
 
   private int currentFloor;
   private Direction currentDirection;
@@ -24,6 +19,7 @@ public class Elevator implements ElevatorState, ElevatorController {
   private WaitingUsers waitingUsers;
   private ElevatorUsers elevatorUsers;
   private StateHistory stateHistory;
+  private long totalScore;
 
   private ElevatorStrategy strategy;
 
@@ -98,10 +94,12 @@ public class Elevator implements ElevatorState, ElevatorController {
       history
           .append("<table cellpadding='5' cellmargin='2'>")
           .append(
-              "<th>Command</th><th>Floor</th><th>Direction</th><th>Door</th><th>Waiting</th><th>In Elevator</th>");
+              "<th>Command</th><th>Score</th><th>Floor</th><th>Direction</th><th>Door</th><th>Waiting</th><th>In Elevator</th>");
+      Iterator<Command> commandsIt = commandsHistory.iterator();
+      Iterator<String> stateIt = stateHistory.iterator();
       for (int i = 0; i < Math.min(numberOfEntries, commandsHistory.size()); i++) {
-        history.append("<tr>").append("<td>").append(commandsHistory.get(i)).append("</td>")
-            .append(stateHistory.get(i)).append("</tr>");
+        history.append("<tr>").append("<td>").append(commandsIt.next()).append("</td>").append(
+            stateIt.next()).append("</tr>");
       }
       history.append("</table>");
       return history.toString();
@@ -150,8 +148,10 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   public void userHasExited() {
-    elevatorUsers.userExited(currentFloor);
-
+    int scoreOfUser = elevatorUsers.userExited(currentFloor);
+    if (scoreOfUser != ElevatorUsers.NULL_SCORE) {
+      totalScore += scoreOfUser;
+    }
   }
 
   public Command nextCommand() {
@@ -327,13 +327,15 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   private String getStateAsHtmlString() {
-    return "<td>" + currentFloor + "</td><td>" + currentDirection + "</td><td>" + doorState
+    return "<td>" + totalScore + "</td><td>" + currentFloor + "</td><td>" + currentDirection
+        + "</td><td>" + doorState
         + "</td><td>" + waitingUsers + "</td><td>" + elevatorUsers + "</td>";
   }
 
   @Override
   public String toString() {
-    return "Floor: " + currentFloor + ", Dir: " + currentDirection + ", door: " + doorState
+    return "Score: " + totalScore + ", Floor: " + currentFloor + ", Dir: " + currentDirection
+        + ", door: " + doorState
         + ", " + waitingUsers + ", " + elevatorUsers;
   }
 

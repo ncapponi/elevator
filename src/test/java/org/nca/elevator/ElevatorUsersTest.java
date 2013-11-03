@@ -45,7 +45,7 @@ public class ElevatorUsersTest {
     users.userEntered(new WaitingUser(0, Direction.UP));
     users.userRequestedFloor(3, 0);
 
-    assertThat(users.userExited(3)).isTrue();
+    assertThat(users.userExited(3)).isGreaterThan(0);
     assertThat(users.nbUsersFor(3)).isEqualTo(0);
   }
 
@@ -55,7 +55,7 @@ public class ElevatorUsersTest {
     users.userEntered(new WaitingUser(0, Direction.UP));
 
     // no explicit requested floor
-    assertThat(users.userExited(3)).isTrue();
+    assertThat(users.userExited(3)).isGreaterThan(0);
     assertThat(users.nbUsersFor(3)).isEqualTo(0);
   }
 
@@ -65,7 +65,7 @@ public class ElevatorUsersTest {
     users.userEntered(new WaitingUser(2, Direction.UNKNOWN));
 
     // no explicit requested floor
-    assertThat(users.userExited(3)).isTrue();
+    assertThat(users.userExited(3)).isGreaterThan(0);
     assertThat(users.nbUsersFor(3)).isEqualTo(0);
   }
 
@@ -76,7 +76,7 @@ public class ElevatorUsersTest {
     users.userRequestedFloor(3, 0);
     users.userEntered(new WaitingUser(2, Direction.UNKNOWN));
 
-    assertThat(users.userExited(3)).isTrue();
+    assertThat(users.userExited(3)).isGreaterThan(0);
     assertThat(users.nbUsersFor(3)).isEqualTo(0);
     assertThat(users.nbUsersToward(Direction.DOWN, 3)).isEqualTo(1); // match unknown direction
   }
