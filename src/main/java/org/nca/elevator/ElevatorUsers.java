@@ -74,14 +74,23 @@ class ElevatorUsers {
     return removed;
   }
 
+  /**
+   * Receives a tick.
+   */
+  public void tick() {
+    for (ElevatorUser user : users) {
+      user.tick();
+    }
+  }
+
   private boolean removeUserAtFloor(int exitFloor, ExitReason reason) {
     Iterator<ElevatorUser> iterator = users.iterator();
     while (iterator.hasNext()) {
       ElevatorUser user = iterator.next();
       if (shouldRemoveUserAtFloor(user, exitFloor, reason)) {
         iterator.remove();
-        logger.info("An user has exited at floor {}, exit reason {}, removed user: {}", exitFloor,
-            reason, user);
+        logger.info("An user has exited at floor {}, score {}, exit reason {}, removed user: {}",
+            exitFloor, user.getFinalScore(), reason, user);
         return true;
       }
     }

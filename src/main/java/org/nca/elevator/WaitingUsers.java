@@ -14,6 +14,15 @@ class WaitingUsers {
 
 	private List<WaitingUser> users = new ArrayList<WaitingUser>();
 
+  /**
+   * Receives a tick.
+   */
+  public void tick() {
+    for (WaitingUser user : users) {
+      user.tick();
+    }
+  }
+
 	public void add(WaitingUser user) {
 		users.add(user);
 	}
@@ -75,6 +84,6 @@ class WaitingUsers {
 
 	@Override
 	public String toString() {
-    return "Waiting: [" + users + "]";
+    return "Wait: [" + users + "]";
 	}
 }

@@ -1,5 +1,7 @@
 package org.nca.elevator;
 
+import static java.lang.Math.abs;
+
 import org.nca.elevator.Elevator.Direction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +15,13 @@ class ElevatorUser {
   private final int entryFloor;
   private final Direction direction;
   private int exitFloor;
+  private final int waitingTicks;
+  private int ticks;
 
   public ElevatorUser(WaitingUser user) {
     this.entryFloor = user.getFloor();
     this.direction = user.getDirection();
+    this.waitingTicks = user.getTicks();
     this.exitFloor = UNSET_EXIT_FLOOR;
   }
 
@@ -68,9 +73,57 @@ class ElevatorUser {
     return direction;
   }
 
+  /**
+   * Returns the number of ticks this user has waited.
+   */
+  public int getTicks() {
+    return ticks;
+  }
+
+  /**
+   * Receives a tick.
+   */
+  public void tick() {
+    ticks++;
+  }
+
+  /**
+   * Returns the estimated score for this user if elevator goes straight to exit floor when it is at
+   * provided floor.
+   */
+  public int estimateScore(int currentFloor) {
+    // based on Score#score method
+    return 20 - ticks - bestTickToGo(currentFloor, exitFloor) - (waitingTicks / 2)
+        + bestTickToGo(entryFloor, exitFloor);
+  }
+
+  /**
+   * Return the final score for this user. Only valid if called when user exits.
+   */
+  public int getFinalScore() {
+    return 20 - ticks - (waitingTicks / 2) + bestTickToGo(entryFloor, exitFloor);
+  }
+
+  /**
+   * Shameless copy of server code, to compute minimum number of ticks from one floor to another.
+   * {@link https
+   * ://github.com/xebia-france/code-elevator/blob/master/elevator-server/src/main/java/elevator
+   * /server/Score.java }
+   */
+  private Integer bestTickToGo(Integer floor, Integer floorToGo) {
+    // elevator is OPEN at floor
+    final Integer elevatorHasToCloseDoorsWhenAtFloor = 1;
+    final Integer elevatorGoesStraightFromFloorToFloorToGo = abs(floorToGo - floor);
+    final Integer elevatorHasToOpenDoorsWhenAtFloorToGo = 1;
+
+    return elevatorHasToCloseDoorsWhenAtFloor + elevatorGoesStraightFromFloorToFloorToGo
+        + elevatorHasToOpenDoorsWhenAtFloorToGo;
+  }
+
   @Override
   public String toString() {
-    return "from " + entryFloor + " " + direction + " to " + (hasExitFloor() ? exitFloor : "?");
+    return "from " + entryFloor + " " + direction + " to " + (hasExitFloor() ? exitFloor : "?")
+        + " T=" + waitingTicks + "+" + ticks;
   }
 
   @Override

@@ -151,14 +151,21 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   public void userHasExited() {
     elevatorUsers.userExited(currentFloor);
+
   }
 
   public Command nextCommand() {
     ajustDirection();
     Command command = strategy.nextCommand(this, this);
     recordState(command, getStateAsHtmlString());
-    logger.info("Command: {}, state: {}", command, this);
+    increaseTick();
+    logger.info("Command returned: {}", command);
     return command;
+  }
+
+  private void increaseTick() {
+    waitingUsers.tick();
+    elevatorUsers.tick();
   }
 
   private void ajustDirection() {
