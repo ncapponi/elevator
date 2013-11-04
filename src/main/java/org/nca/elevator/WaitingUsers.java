@@ -47,9 +47,9 @@ class WaitingUsers {
         return selectedUser;
     }
 
-    public int nbUsersToward(Direction direction, int currentFloor) {
+    public int nbUsersToward(Direction direction, int currentFloor, int higherFloor) {
         int min = direction == Direction.UP ? currentFloor + 1 : 0;
-        int max = direction == Direction.UP ? Elevator.MAX_FLOOR : currentFloor - 1;
+        int max = direction == Direction.UP ? higherFloor : currentFloor - 1;
         int count = 0;
         for (int floor = min; floor <= max; floor++) {
             count += nbUsersFor(floor);
@@ -57,18 +57,18 @@ class WaitingUsers {
         return count;
     }
 
-    public int scoreToward(Direction direction, int currentFloor) {
+    public int scoreToward(Direction direction, int currentFloor, int higherFloor) {
         int min = direction == Direction.UP ? currentFloor + 1 : 0;
-        int max = direction == Direction.UP ? Elevator.MAX_FLOOR : currentFloor - 1;
+        int max = direction == Direction.UP ? higherFloor : currentFloor - 1;
         int score = 0;
         for (int floor = min; floor <= max; floor++) {
-            score += (Elevator.MAX_FLOOR - abs(currentFloor - floor)) * nbUsersFor(floor);
+            score += (higherFloor - abs(currentFloor - floor)) * nbUsersFor(floor);
         }
         return score;
     }
 
-    public boolean hasUserToward(Direction direction, int currentFloor) {
-        return nbUsersToward(direction, currentFloor) > 0;
+    public boolean hasUserToward(Direction direction, int currentFloor, int higherFloor) {
+        return nbUsersToward(direction, currentFloor, higherFloor) > 0;
     }
 
     public boolean hasUserFor(int floor) {

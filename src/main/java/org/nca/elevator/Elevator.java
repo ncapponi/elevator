@@ -9,10 +9,9 @@ import org.slf4j.LoggerFactory;
 
 public class Elevator implements ElevatorState, ElevatorController {
 
-  public static final int MAX_FLOOR = 5;
-
   static final Logger logger = LoggerFactory.getLogger(Elevator.class);
 
+  private int lowerFloor, higherFloor;
   private int currentFloor;
   private Direction currentDirection;
   private Door doorState;
@@ -26,7 +25,7 @@ public class Elevator implements ElevatorState, ElevatorController {
   public Elevator(ElevatorStrategy strategy) {
     logger.info("Initialising elevator with strategy {}", strategy.getClass());
     this.strategy = strategy;
-    resetState();
+    resetState(0, 19);
   }
 
   public static enum Command {
@@ -106,11 +105,17 @@ public class Elevator implements ElevatorState, ElevatorController {
     }
   }
 
+  public int getHigherFloor() {
+    return higherFloor;
+  }
+  
   public String getHistoryAsHtml(int numberOfEntries) {
     return stateHistory.getHistoryAsHtml(numberOfEntries);
   }
 
-  private void resetState() {
+  private void resetState(int lowerFloor, int higherFloor) {
+    this.lowerFloor = lowerFloor;
+    this.higherFloor = higherFloor;
     currentFloor = 0;
     doorState = Door.CLOSED;
     currentDirection = Direction.UP;
@@ -128,8 +133,8 @@ public class Elevator implements ElevatorState, ElevatorController {
     return this.strategy.getClass();
   }
 
-  public void reset() {
-    resetState();
+  public void reset(int lowerFloor, int higherFloor) {
+    resetState(lowerFloor, higherFloor);
   }
 
   // floor: 0-5, to : UP/DOWN
@@ -169,10 +174,10 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   private void ajustDirection() {
-    if (currentFloor == 0) {
+    if (currentFloor == lowerFloor) {
       currentDirection = Direction.UP;
     }
-    else if (currentFloor == MAX_FLOOR) {
+    else if (currentFloor == higherFloor) {
       currentDirection = Direction.DOWN;
     }
   }
@@ -228,7 +233,7 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   private boolean hasUsersInDirection(Direction direction) {
     return elevatorUsers.hasUserToward(direction, currentFloor)
-        || waitingUsers.hasUserToward(direction, currentFloor);
+        || waitingUsers.hasUserToward(direction, currentFloor, higherFloor);
   }
 
   @Override
@@ -253,12 +258,12 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   private int nbUsersInDirection(Direction direction) {
     return elevatorUsers.nbUsersToward(direction, currentFloor)
-        + waitingUsers.nbUsersToward(direction, currentFloor);
+        + waitingUsers.nbUsersToward(direction, currentFloor, higherFloor);
   }
 
   private int scoreInDirection(Direction direction) {
-    return elevatorUsers.scoreToward(direction, currentFloor)
-        + waitingUsers.scoreToward(direction, currentFloor);
+    return elevatorUsers.scoreToward(direction, currentFloor, higherFloor)
+        + waitingUsers.scoreToward(direction, currentFloor, higherFloor);
   }
 
   /* (non-Javadoc)

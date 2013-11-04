@@ -132,7 +132,12 @@ public class Server {
     get(new Route("/reset") {
       @Override
       public Object handle(Request request, Response response) {
-        elevator.reset();
+        String lowerFloor = request.queryParams("lowerFloor");
+        String higherFloor = request.queryParams("higherFloor");
+        String cause = request.queryParams("cause");
+
+        logger.info("Resetting elevator from {} to {} because of : {}", lowerFloor, higherFloor, cause);
+        elevator.reset(Integer.valueOf(lowerFloor), Integer.valueOf(higherFloor));
         return "";
       }
     });

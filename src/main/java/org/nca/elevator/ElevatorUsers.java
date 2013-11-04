@@ -148,14 +148,14 @@ class ElevatorUsers {
     return count;
   }
 
-  public int scoreToward(Direction direction, int currentFloor) {
+  public int scoreToward(Direction direction, int currentFloor, int higherFloor) {
     int score = 0;
     for (ElevatorUser user : users) {
       if (user.hasExitFloor()) {
         int exitFloor = user.getExitFloor();
         if ((direction == Direction.UP && exitFloor > currentFloor)
             || (direction == Direction.DOWN && exitFloor < currentFloor)) {
-          score += (2 * Elevator.MAX_FLOOR) - Math.abs(exitFloor - currentFloor);
+          score += (2 * higherFloor) - Math.abs(exitFloor - currentFloor);
         }
       }
     }
