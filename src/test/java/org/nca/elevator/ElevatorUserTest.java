@@ -40,7 +40,7 @@ public class ElevatorUserTest {
 
   @Test
   public void couldExitAtFromSecondFloor() throws Exception {
-    ElevatorUser user = new ElevatorUser(new WaitingUser(2, Direction.UNKNOWN));
+    ElevatorUser user = new ElevatorUser(new WaitingUser(2, Direction.NONE));
 
     assertThat(user.couldExitAt(0)).isTrue();
     assertThat(user.couldExitAt(1)).isTrue();

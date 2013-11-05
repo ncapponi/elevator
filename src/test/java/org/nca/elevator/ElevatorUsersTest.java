@@ -19,7 +19,7 @@ public class ElevatorUsersTest {
   @Test
   public void floorRequested_TwoUsersMatchingWithOneSure() throws Exception {
     ElevatorUsers users = new ElevatorUsers();
-    users.userEntered(new WaitingUser(2, Direction.UNKNOWN));
+    users.userEntered(new WaitingUser(2, Direction.NONE));
     WaitingUser knownUser = new WaitingUser(2, Direction.UP);
     users.userEntered(knownUser);
 
@@ -31,7 +31,7 @@ public class ElevatorUsersTest {
   @Test
   public void floorRequested_OnePossibleUserMatching() throws Exception {
     ElevatorUsers users = new ElevatorUsers();
-    WaitingUser unknownUser = new WaitingUser(2, Direction.UNKNOWN);
+    WaitingUser unknownUser = new WaitingUser(2, Direction.NONE);
     users.userEntered(unknownUser);
 
     ElevatorUser selectedUser = users.userRequestedFloor(3, 2);
@@ -62,7 +62,7 @@ public class ElevatorUsersTest {
   @Test
   public void userExited_UserCould() throws Exception {
     ElevatorUsers users = new ElevatorUsers();
-    users.userEntered(new WaitingUser(2, Direction.UNKNOWN));
+    users.userEntered(new WaitingUser(2, Direction.NONE));
 
     // no explicit requested floor
     assertThat(users.userExited(3)).isGreaterThan(0);
@@ -74,7 +74,7 @@ public class ElevatorUsersTest {
     ElevatorUsers users = new ElevatorUsers();
     users.userEntered(new WaitingUser(0, Direction.UP));
     users.userRequestedFloor(3, 0);
-    users.userEntered(new WaitingUser(2, Direction.UNKNOWN));
+    users.userEntered(new WaitingUser(2, Direction.NONE));
 
     assertThat(users.userExited(3)).isGreaterThan(0);
     assertThat(users.nbUsersFor(3)).isEqualTo(0);

@@ -3,6 +3,7 @@ package org.nca.elevator;
 import static java.lang.Math.abs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -42,7 +43,7 @@ class WaitingUsers {
         if (selectedUser == null) {
             logger.warn(
                     "Unable to find first waiting user for floor {}, providing one without direction", floor);
-            selectedUser = new WaitingUser(floor, Direction.UNKNOWN);
+            selectedUser = new WaitingUser(floor, Direction.NONE);
         }
         return selectedUser;
     }
@@ -83,9 +84,38 @@ class WaitingUsers {
         }
         return number;
     }
+    
+    public int getTotalTicks() {
+        int total = 0;
+        for (WaitingUser user : users) {
+            total += user.getTicks();
+        }
+        return total;
+    }
+    
+    public int getAverageTicksPerUser() {
+        return getTotalTicks() / (users.isEmpty() ? 1 : users.size());
+    }
 
+    public String toString(String separator, String[] boundaries) {
+        StringBuilder builder = new StringBuilder();
+        Collections.sort(users);
+        for (WaitingUser user : users) {
+            if (builder.length() > 0)
+                builder.append(separator);
+            builder.append(user);
+        }
+        builder.insert(0, "Nb=" + users.size() + " " + boundaries[0]);
+        builder.append(boundaries[1]);
+        return builder.toString();
+    }
+    
+    public String toHTMLString() {
+        return toString("<br/>", new String[]{ "<br/>", ""});
+    }
+    
     @Override
     public String toString() {
-        return "Wait: [" + users + "]";
+        return toString(" | ", new String[]{ "[", "]"});
     }
 }

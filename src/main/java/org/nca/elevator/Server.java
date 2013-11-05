@@ -137,7 +137,12 @@ public class Server {
         String cause = request.queryParams("cause");
 
         logger.info("Resetting elevator from {} to {} because of : {}", lowerFloor, higherFloor, cause);
-        elevator.reset(Integer.valueOf(lowerFloor), Integer.valueOf(higherFloor));
+        if (lowerFloor!=null && higherFloor!=null) {
+            elevator.reset(Integer.valueOf(lowerFloor), Integer.valueOf(higherFloor));
+        }
+        else {
+            elevator.reset(0, 20); // allow to use the not up-to-date elevator server
+        }
         return "";
       }
     });
@@ -167,7 +172,7 @@ public class Server {
     after(new Filter() {// matches all routes
       @Override
       public void handle(Request request, Response response) {
-        logger.info("Done {}{}, state: {}", request.pathInfo(), request.queryString() == null ? ""
+        logger.info("Done {}{}, {}", request.pathInfo(), request.queryString() == null ? ""
             : "?" + request.queryString(), elevator);
         lock.unlock();
       }

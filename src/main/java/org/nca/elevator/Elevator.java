@@ -18,7 +18,6 @@ public class Elevator implements ElevatorState, ElevatorController {
   private WaitingUsers waitingUsers;
   private ElevatorUsers elevatorUsers;
   private StateHistory stateHistory;
-  private long totalScore;
 
   private ElevatorStrategy strategy;
 
@@ -33,17 +32,27 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   static enum Direction {
-    UP, DOWN, UNKNOWN;
+    UP("U"), DOWN("D"), NONE("_");
 
+    private final String label;
+    
+    private Direction(String label) {
+        this.label = label;
+    }
+    
+    public String toShortString() {
+        return label;
+    }
+    
     public Direction flip() {
-      if (this == UNKNOWN) {
+      if (this == NONE) {
         throw new RuntimeException("Unable to flip this direction: " + this);
       }
       return this == DOWN ? UP : DOWN;
     }
 
     public Command toCommand() {
-      if (this == UNKNOWN) {
+      if (this == NONE) {
         throw new RuntimeException("Unable to transform this direction into command: " + this);
       }
       return Command.valueOf(this.toString());
@@ -60,11 +69,11 @@ public class Elevator implements ElevatorState, ElevatorController {
     int counter = 0;
 
     public void add(Command command, String stateAsHtml) {
-      // keep only 1000 last items
+      // keep only 50 last items
       commandsHistory.addFirst(command);
       stateHistory.addFirst(stateAsHtml);
       counter++;
-      if (counter >= 1000) {
+      if (counter >= 50) {
         commandsHistory.removeLast();
         stateHistory.removeLast();
       }
@@ -93,7 +102,7 @@ public class Elevator implements ElevatorState, ElevatorController {
       history
           .append("<table cellpadding='5' cellmargin='2'>")
           .append(
-              "<th>Command</th><th>Score</th><th>Floor</th><th>Direction</th><th>Door</th><th>Waiting</th><th>In Elevator</th>");
+              "<th>Command</th><th>Ticks</th><th>Floor</th><th>Direction</th><th>Door</th><th>Waiting</th><th>In Elevator</th>");
       Iterator<Command> commandsIt = commandsHistory.iterator();
       Iterator<String> stateIt = stateHistory.iterator();
       for (int i = 0; i < Math.min(numberOfEntries, commandsHistory.size()); i++) {
@@ -153,10 +162,7 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   public void userHasExited() {
-    int scoreOfUser = elevatorUsers.userExited(currentFloor);
-    if (scoreOfUser != ElevatorUsers.NULL_SCORE) {
-      totalScore += scoreOfUser;
-    }
+    elevatorUsers.userExited(currentFloor);
   }
 
   public Command nextCommand() {
@@ -255,6 +261,10 @@ public class Elevator implements ElevatorState, ElevatorController {
   public int scoreInOppositeDirection() {
     return scoreInDirection(currentDirection.flip());
   }
+  
+  public int getTotalTicks() {
+      return waitingUsers.getTotalTicks() + elevatorUsers.getTotalTicks();
+  }
 
   private int nbUsersInDirection(Direction direction) {
     return elevatorUsers.nbUsersToward(direction, currentFloor)
@@ -332,16 +342,16 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   private String getStateAsHtmlString() {
-    return "<td>" + totalScore + "</td><td>" + currentFloor + "</td><td>" + currentDirection
-        + "</td><td>" + doorState
-        + "</td><td>" + waitingUsers + "</td><td>" + elevatorUsers + "</td>";
+    return "<td>" + getTotalTicks() + "/" + waitingUsers.getAverageTicksPerUser() + "/" + elevatorUsers.getAverageTicksPerUser() + 
+            "</td><td>" + currentFloor + "</td><td>" + currentDirection + "</td><td>" + doorState +
+            "</td><td>" + waitingUsers.toHTMLString() + "</td><td>" + elevatorUsers.toHTMLString() + "</td>";
   }
 
   @Override
   public String toString() {
-    return "Score: " + totalScore + ", Floor: " + currentFloor + ", Dir: " + currentDirection
-        + ", door: " + doorState
-        + ", " + waitingUsers + ", " + elevatorUsers;
+    return "Ticks: " + getTotalTicks() + "/" + waitingUsers.getAverageTicksPerUser() + "/" + elevatorUsers.getAverageTicksPerUser() + 
+            ", Floor=" + currentFloor + ", Dir=" + currentDirection + ", Door=" + doorState +
+            ", WAIT " + waitingUsers + ", ELEV " + elevatorUsers;
   }
 
 }
