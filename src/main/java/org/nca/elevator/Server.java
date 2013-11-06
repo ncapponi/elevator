@@ -26,13 +26,16 @@ public class Server {
 
   static final Logger logger = LoggerFactory.getLogger(Server.class);
 
+  private final String ipAddress;
+
+  private final int port;
+
   public static void main(String[] args) {
     System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tT] %4$s: %5$s %n");
     try {
-      // Default values
       String ipAddress = "localhost";
       int port = 8080;
-      String strategyClass = "ClassicStrategy";
+      String strategy = "ClassicStrategy";
 
       if (args.length == 3) {
         ipAddress = args[0];
@@ -40,28 +43,36 @@ public class Server {
           ipAddress = InetAddress.getLocalHost().getHostAddress();
         }
         port = Integer.valueOf(args[1]);
-        strategyClass = args[2];
+        strategy = args[2];
       }
-      strategyClass = "org.nca.elevator.strategy." + strategyClass;
+      String strategyClass = "org.nca.elevator.strategy." + strategy;
+
       logger.info("Launch Elevator Server on address {}, port {}, using strategy {}", ipAddress, port, strategyClass);
-      startElevator(ipAddress, port, strategyClass);
+      new Server(ipAddress, port).startElevator(strategyClass);
+
     } catch (Exception e) {
       e.printStackTrace();
       logger.error("Unable to start elevator", e);
     }
   }
 
-  private static void startElevator(String ipAddress, int port, String strategyClass)
-      throws Exception {
+  Server(String ipAddress, int port) {
+    this.ipAddress = ipAddress;
+    this.port = port;
+
+  }
+
+  void startElevator(String strategyClass) throws Exception {
     setIpAddress(ipAddress);
     setPort(port);
     ElevatorStrategy strategy = (ElevatorStrategy) Class.forName(strategyClass).newInstance();
     final Elevator elevator = new Elevator(strategy);
     defineFilters(elevator);
     defineRoutes(elevator);
+    defineFeedbackRoutes(elevator);
   }
 
-  private static void defineRoutes(final Elevator elevator) {
+  private void defineFeedbackRoutes(final Elevator elevator) {
     get(new Route("/status") {
       @Override
       public Object handle(Request request, Response response) {
@@ -72,6 +83,23 @@ public class Server {
           response.type("text/html");
           result = "<p><b>Elevator</b> using strategy: " + elevator.getStrategy().getName()
               + ".</p>" + "<p><b>State</b> :" + elevator.getHistoryAsHtml(numberOfEntries) + "</p>";
+        } catch (Exception e) {
+          result = e.getMessage();
+        }
+        return result;
+      }
+    });
+
+    get(new Route("/commands") {
+      @Override
+      public Object handle(Request request, Response response) {
+        String result = "";
+        try {
+          String entries = request.queryParams("entries");
+          int numberOfEntries = entries == null ? 1 : Integer.valueOf(entries);
+          response.type("text/html");
+          result = "<h4><b>Commands History</b></h4>" + "<p><b>State</b> :"
+              + elevator.getCommandHistoryAsHtml(numberOfEntries) + "</p>";
         } catch (Exception e) {
           result = e.getMessage();
         }
@@ -93,7 +121,9 @@ public class Server {
         return "Strategy successfully changed to " + klass;
       }
     });
+  }
 
+  private void defineRoutes(final Elevator elevator) {
     get(new Route("/call") {
       @Override
       public Object handle(Request request, Response response) {
@@ -141,7 +171,7 @@ public class Server {
             elevator.reset(Integer.valueOf(lowerFloor), Integer.valueOf(higherFloor));
         }
         else {
-            elevator.reset(0, 20); // allow to use the not up-to-date elevator server
+          elevator.reset(0, 19); // allow to use the not up-to-date elevator server
         }
         return "";
       }
@@ -150,13 +180,18 @@ public class Server {
     get(new Route("/nextCommand") {
       @Override
       public Object handle(Request request, Response response) {
-        Command command = elevator.nextCommand();
-        return command.toString();
+        try {
+          Command command = elevator.nextCommand();
+          return command.toString();
+        } catch (Exception e) {
+          logger.error("Unexpected error in next command: {}", e.getMessage());
+          return Command.NOTHING;
+        }
       }
     });
   }
 
-  private static void defineFilters(final ElevatorState elevator) {
+  private void defineFilters(final ElevatorState elevator) {
     // performance is not important, just lock each request handling to avoid fine-tuned locking
     final ReentrantLock lock = new ReentrantLock();
 

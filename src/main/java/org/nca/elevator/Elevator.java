@@ -94,7 +94,7 @@ public class Elevator implements ElevatorState, ElevatorController {
     }
 
     public Command getLastCommand() {
-      return commandsHistory.getFirst();
+      return commandsHistory.isEmpty() ? null : commandsHistory.getFirst();
     }
 
     public String getHistoryAsHtml(int numberOfEntries) {
@@ -112,6 +112,18 @@ public class Elevator implements ElevatorState, ElevatorController {
       history.append("</table>");
       return history.toString();
     }
+
+    public String getCommandHistoryAsHtml(int numberOfEntries) {
+      StringBuilder history = new StringBuilder();
+      history.append("<table cellpadding='5' cellmargin='2'>").append("<th>Command</th>");
+      Iterator<Command> commandsIt = commandsHistory.iterator();
+      for (int i = 0; i < Math.min(numberOfEntries, commandsHistory.size()); i++) {
+        history.append("<tr>").append("<td>").append(commandsIt.next()).append("</td>").append(
+            "</tr>");
+      }
+      history.append("</table>");
+      return history.toString();
+    }
   }
 
   public int getHigherFloor() {
@@ -120,6 +132,10 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   public String getHistoryAsHtml(int numberOfEntries) {
     return stateHistory.getHistoryAsHtml(numberOfEntries);
+  }
+
+  public String getCommandHistoryAsHtml(int numberOfEntries) {
+    return stateHistory.getCommandHistoryAsHtml(numberOfEntries);
   }
 
   private void resetState(int lowerFloor, int higherFloor) {
@@ -142,27 +158,32 @@ public class Elevator implements ElevatorState, ElevatorController {
     return this.strategy.getClass();
   }
 
-  public void reset(int lowerFloor, int higherFloor) {
+  public Elevator reset(int lowerFloor, int higherFloor) {
     resetState(lowerFloor, higherFloor);
+    return this;
   }
 
   // floor: 0-5, to : UP/DOWN
-  public void call(int atFloor, String to) {
+  public Elevator call(int atFloor, String to) {
     waitingUsers.add(new WaitingUser(atFloor, Direction.valueOf(to)));
+    return this;
   }
 
-  public void go(int floor) {
+  public Elevator go(int floor) {
     elevatorUsers.userRequestedFloor(floor, currentFloor);
+    return this;
   }
 
-  public void userHasEntered() {
+  public Elevator userHasEntered() {
       WaitingUser user = waitingUsers.popUser(currentFloor);
       elevatorUsers.userEntered(user);
       logger.info("User has entered, added " + user);
+    return this;
   }
 
-  public void userHasExited() {
+  public Elevator userHasExited() {
     elevatorUsers.userExited(currentFloor);
+    return this;
   }
 
   public Command nextCommand() {
