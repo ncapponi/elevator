@@ -17,17 +17,8 @@ public class ClassicStrategy implements ElevatorStrategy {
   @Override
   public Command nextCommand(ElevatorState e, ElevatorController c) {
     Command command = null;
-    if (e.isStale()) {
-      if (e.hasDoorOpen()) {
-        command = c.closeDoor();
-      }
-      else if (e.hasDoorClosed()) {
-        command = c.goCurrentDirection();
-      }
-      logger.warn("force action to avoid staying in stale state: {}", command);
-    }
-    else if (e.hasDoorClosed()) {
-      if (e.hasWaitingUserForCurrentFloor() || e.hasElevatorUserForCurrentFloor()) {
+    if (e.hasDoorClosed()) {
+      if (wasNotClosedJustBefore(e) && hasSomeUserForThisFloor(e)) {
         command = c.openDoor();
       }
       else if (e.hasUsersInCurrentDirection()) {
@@ -37,15 +28,16 @@ public class ClassicStrategy implements ElevatorStrategy {
         command = c.goOppositeDirection();
       }
       else {
-        command = c.doNothing();
+        // ensure we minimize next moves when next users come
+        command = c.goToMiddleFloor();
       }
     }
     else if (e.hasDoorOpen()) {
-      if (e.hasWaitingUserForCurrentFloor()) {
+      if (wasNotWaitingJustBefore(e) && e.hasWaitingUserForCurrentFloor()) {
         command = c.doNothing(); // wait for user to enter
       }
       else {
-        command = c.closeDoor();
+        command = c.closeDoor(); // move on
       }
     }
     else {
@@ -53,6 +45,18 @@ public class ClassicStrategy implements ElevatorStrategy {
       command = c.doNothing();
     }
     return command;
+  }
+
+  private boolean wasNotWaitingJustBefore(ElevatorState e) {
+    return !e.lastCommand().equals(Command.NOTHING);
+  }
+
+  private boolean hasSomeUserForThisFloor(ElevatorState e) {
+    return e.hasWaitingUserForCurrentFloor() || e.hasElevatorUserForCurrentFloor();
+  }
+
+  private boolean wasNotClosedJustBefore(ElevatorState e) {
+    return !e.lastCommand().equals(Command.CLOSE);
   }
 
 }

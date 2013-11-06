@@ -4,14 +4,16 @@ import org.nca.elevator.Elevator.Command;
 
 public interface ElevatorController {
 
-  public abstract Command doNothing();
+  Command doNothing();
 
-  public abstract Command openDoor();
+  Command openDoor();
 
-  public abstract Command closeDoor();
+  Command closeDoor();
 
-  public abstract Command goCurrentDirection();
+  Command goCurrentDirection();
 
-  public abstract Command goOppositeDirection();
+  Command goOppositeDirection();
+
+  Command goToMiddleFloor();
 
 }

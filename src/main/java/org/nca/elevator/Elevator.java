@@ -35,15 +35,15 @@ public class Elevator implements ElevatorState, ElevatorController {
     UP("U"), DOWN("D"), NONE("_");
 
     private final String label;
-    
+
     private Direction(String label) {
         this.label = label;
     }
-    
+
     public String toShortString() {
         return label;
     }
-    
+
     public Direction flip() {
       if (this == NONE) {
         throw new RuntimeException("Unable to flip this direction: " + this);
@@ -117,7 +117,7 @@ public class Elevator implements ElevatorState, ElevatorController {
   public int getHigherFloor() {
     return higherFloor;
   }
-  
+
   public String getHistoryAsHtml(int numberOfEntries) {
     return stateHistory.getHistoryAsHtml(numberOfEntries);
   }
@@ -261,7 +261,7 @@ public class Elevator implements ElevatorState, ElevatorController {
   public int scoreInOppositeDirection() {
     return scoreInDirection(currentDirection.flip());
   }
-  
+
   public int getTotalTicks() {
       return waitingUsers.getTotalTicks() + elevatorUsers.getTotalTicks();
   }
@@ -307,9 +307,6 @@ public class Elevator implements ElevatorState, ElevatorController {
     return Command.OPEN;
   }
 
-  /* (non-Javadoc)
-   * @see org.nca.elevator.ElevatorController#close()
-   */
   @Override
   public Command closeDoor() {
     doorState = Door.CLOSED;
@@ -317,18 +314,12 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   }
 
-  /* (non-Javadoc)
-   * @see org.nca.elevator.ElevatorController#goCurrentDirection()
-   */
   @Override
   public Command goCurrentDirection() {
     currentFloor = currentFloor + (currentDirection == Direction.UP ? 1 : -1);
     return currentDirection.toCommand();
   }
 
-  /* (non-Javadoc)
-   * @see org.nca.elevator.ElevatorController#goOppositeDirection()
-   */
   @Override
   public Command goOppositeDirection() {
     currentDirection = currentDirection.flip();
@@ -337,19 +328,33 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   @Override
+  public Command goToMiddleFloor() {
+    int middleFloor = (higherFloor + lowerFloor) / 2;
+    if (currentFloor > middleFloor) {
+      return Command.DOWN;
+    }
+    else if (currentFloor < middleFloor) {
+      return Command.UP;
+    }
+    else {
+      return Command.NOTHING;
+    }
+  }
+
+  @Override
   public String getStateAsString() {
     return toString();
   }
 
   private String getStateAsHtmlString() {
-    return "<td>" + getTotalTicks() + "/" + waitingUsers.getAverageTicksPerUser() + "/" + elevatorUsers.getAverageTicksPerUser() + 
+    return "<td>" + getTotalTicks() + "/" + waitingUsers.getAverageTicksPerUser() + "/" + elevatorUsers.getAverageTicksPerUser() +
             "</td><td>" + currentFloor + "</td><td>" + currentDirection + "</td><td>" + doorState +
             "</td><td>" + waitingUsers.toHTMLString() + "</td><td>" + elevatorUsers.toHTMLString() + "</td>";
   }
 
   @Override
   public String toString() {
-    return "Ticks: " + getTotalTicks() + "/" + waitingUsers.getAverageTicksPerUser() + "/" + elevatorUsers.getAverageTicksPerUser() + 
+    return "Ticks: " + getTotalTicks() + "/" + waitingUsers.getAverageTicksPerUser() + "/" + elevatorUsers.getAverageTicksPerUser() +
             ", Floor=" + currentFloor + ", Dir=" + currentDirection + ", Door=" + doorState +
             ", WAIT " + waitingUsers + ", ELEV " + elevatorUsers;
   }
