@@ -23,7 +23,7 @@ class ElevatorUsers {
 
     /**
      * Acknowledge a request for the provided floor.
-     * 
+     *
      * @param requestedFloor
      *            floor requested
      * @param currentFloor
@@ -65,7 +65,7 @@ class ElevatorUsers {
 
     /**
      * Remove any user that matches, always using best match first.
-     * 
+     *
      * @return the final score of the removed user, or {@code NULL_SCORE} if no
      *         user could be find to be removed
      */
@@ -92,7 +92,7 @@ class ElevatorUsers {
     /**
      * Remove an elevator user matching the provided exit floor and exit reason,
      * and return its final score.
-     * 
+     *
      * @return the final score of the removed user, or {@code NULL_SCORE} if no
      *         user could be find to be removed
      */
@@ -129,6 +129,10 @@ class ElevatorUsers {
             }
         }
         return count;
+    }
+
+    public int nbUsers() {
+      return users.size();
     }
 
     public boolean hasUserToward(Direction direction, int currentFloor) {
@@ -168,7 +172,7 @@ class ElevatorUsers {
         }
         return total;
     }
-    
+
     public int getAverageTicksPerUser() {
         return getTotalTicks() / (users.isEmpty() ? 1 : users.size());
     }

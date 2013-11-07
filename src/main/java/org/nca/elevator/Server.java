@@ -31,7 +31,7 @@ public class Server {
   private final int port;
 
   public static void main(String[] args) {
-    System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tT] %4$s: %5$s %n");
+    System.setProperty("java.util.logging.SimpleFormatter.format", "[%1$tT:%1$tL] %4$s: %5$s %n");
     try {
       String ipAddress = "localhost";
       int port = 8080;
@@ -83,23 +83,6 @@ public class Server {
           response.type("text/html");
           result = "<p><b>Elevator</b> using strategy: " + elevator.getStrategy().getName()
               + ".</p>" + "<p><b>State</b> :" + elevator.getHistoryAsHtml(numberOfEntries) + "</p>";
-        } catch (Exception e) {
-          result = e.getMessage();
-        }
-        return result;
-      }
-    });
-
-    get(new Route("/commands") {
-      @Override
-      public Object handle(Request request, Response response) {
-        String result = "";
-        try {
-          String entries = request.queryParams("entries");
-          int numberOfEntries = entries == null ? 1 : Integer.valueOf(entries);
-          response.type("text/html");
-          result = "<h4><b>Commands History</b></h4>" + "<p><b>State</b> :"
-              + elevator.getCommandHistoryAsHtml(numberOfEntries) + "</p>";
         } catch (Exception e) {
           result = e.getMessage();
         }

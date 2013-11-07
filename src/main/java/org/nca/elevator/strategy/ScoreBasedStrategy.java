@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Score based strategy : choose the direction to go based on the best score that can be expected
  * given the current state.
- * 
+ *
  * TODO : need some more work to be implemented.
- * 
+ *
  * 1) add notion of tick to users
- * 
+ *
  * 2) compute score for each user depending on choice
  *
  * 3) compute best decision given sum of score of users
@@ -27,16 +27,7 @@ public class ScoreBasedStrategy implements ElevatorStrategy {
   @Override
   public Command nextCommand(ElevatorState e, ElevatorController c) {
     Command command = null;
-    if (e.isStale()) {
-      if (e.hasDoorOpen()) {
-        command = c.closeDoor();
-      }
-      else if (e.hasDoorClosed()) {
-        command = c.goCurrentDirection();
-      }
-      logger.warn("force action to avoid staying in stale state: {}", command);
-    }
-    else if (e.hasDoorClosed()) {
+    if (e.hasDoorClosed()) {
       if (e.hasWaitingUserForCurrentFloor() || e.hasElevatorUserForCurrentFloor()) {
         command = c.openDoor();
       }

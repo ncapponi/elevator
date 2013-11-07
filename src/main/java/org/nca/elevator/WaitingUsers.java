@@ -84,7 +84,11 @@ class WaitingUsers {
         }
         return number;
     }
-    
+
+    public int nbUsers() {
+      return users.size();
+    }
+
     public int getTotalTicks() {
         int total = 0;
         for (WaitingUser user : users) {
@@ -92,7 +96,7 @@ class WaitingUsers {
         }
         return total;
     }
-    
+
     public int getAverageTicksPerUser() {
         return getTotalTicks() / (users.isEmpty() ? 1 : users.size());
     }
@@ -109,11 +113,11 @@ class WaitingUsers {
         builder.append(boundaries[1]);
         return builder.toString();
     }
-    
+
     public String toHTMLString() {
         return toString("<br/>", new String[]{ "<br/>", ""});
     }
-    
+
     @Override
     public String toString() {
         return toString(" | ", new String[]{ "[", "]"});

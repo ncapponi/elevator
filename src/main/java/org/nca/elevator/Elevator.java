@@ -11,6 +11,12 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   static final Logger logger = LoggerFactory.getLogger(Elevator.class);
 
+  /** Total of ticks since beginning or last reset */
+  private long clockTicks;
+
+  /** Total of user exits since beginning or last reset */
+  private long totalExits;
+
   private int lowerFloor, higherFloor;
   private int currentFloor;
   private Direction currentDirection;
@@ -63,67 +69,106 @@ public class Elevator implements ElevatorState, ElevatorController {
     OPEN, CLOSED;
   }
 
+  static class State {
+    Command command;
+    int floor;
+    Direction dir;
+    Door door;
+    Stats stats;
+    String htmlState;
+
+    State(Command command, int floor, Direction dir, Door door, Stats stats, String htmlState) {
+      this.command = command;
+      this.floor = floor;
+      this.dir = dir;
+      this.door = door;
+      this.stats = stats;
+      this.htmlState = htmlState;
+    }
+  }
+
+  static class Stats {
+    long ticksClock;
+    long totalExits;
+    int nbWait;
+    int nbIn;
+    int waitingTicks;
+    int inboardTicks;
+    int nbFloorsAsEntry;
+    int nbFloorsAsExit;
+
+    public Stats(long ticksClock, long totalExits, int nbWait, int nbIn, int waitingTicks,
+        int inboardTicks, int nbFloorsAsEntry, int nbFloorsAsExit) {
+      this.ticksClock = ticksClock;
+      this.totalExits = totalExits;
+      this.nbWait = nbWait;
+      this.nbIn = nbIn;
+      this.waitingTicks = waitingTicks;
+      this.inboardTicks = inboardTicks;
+      this.nbFloorsAsEntry = nbFloorsAsEntry;
+      this.nbFloorsAsExit = nbFloorsAsExit;
+    }
+  }
+
   static class StateHistory {
-    private LinkedList<Command> commandsHistory = new LinkedList<Command>();
-    private LinkedList<String> stateHistory = new LinkedList<String>();
+    private LinkedList<State> states = new LinkedList<State>();
     int counter = 0;
 
-    public void add(Command command, String stateAsHtml) {
-      // keep only 50 last items
-      commandsHistory.addFirst(command);
-      stateHistory.addFirst(stateAsHtml);
+    public void add(State state) {
+      // keep only N last items
+      states.addFirst(state);
       counter++;
-      if (counter >= 50) {
-        commandsHistory.removeLast();
-        stateHistory.removeLast();
+      if (counter >= 100) {
+        states.removeLast();
       }
-    }
-
-    public boolean isStaleSince(int numberOfCommands) {
-      if (counter <= numberOfCommands) {
-        // not enough commands to look at
-        return false;
-      }
-      for (int i = 0; i < numberOfCommands; i++) {
-        Command command = commandsHistory.get(i);
-        if (!(command.equals(Command.NOTHING) || command.equals(Command.CLOSE))) {
-          return false;
-        }
-      }
-      return true;
     }
 
     public Command getLastCommand() {
-      return commandsHistory.isEmpty() ? null : commandsHistory.getFirst();
+      return states.isEmpty() ? null : states.getFirst().command;
     }
 
-    public String getHistoryAsHtml(int numberOfEntries) {
+    public String getDetailedHistoryAsHtml(int numberOfEntries) {
       StringBuilder history = new StringBuilder();
       history
           .append("<table cellpadding='5' cellmargin='2'>")
           .append(
               "<th>Command</th><th>Ticks</th><th>Floor</th><th>Direction</th><th>Door</th><th>Waiting</th><th>In Elevator</th>");
-      Iterator<Command> commandsIt = commandsHistory.iterator();
-      Iterator<String> stateIt = stateHistory.iterator();
-      for (int i = 0; i < Math.min(numberOfEntries, commandsHistory.size()); i++) {
-        history.append("<tr>").append("<td>").append(commandsIt.next()).append("</td>").append(
-            stateIt.next()).append("</tr>");
+      Iterator<State> stateIt = states.iterator();
+      for (int i = 0; i < Math.min(numberOfEntries, states.size()); i++) {
+        State state = stateIt.next();
+        history.append("<tr>").append("<td>").append(state.command).append("</td>").append(
+            state.htmlState).append("</tr>");
       }
       history.append("</table>");
       return history.toString();
     }
 
-    public String getCommandHistoryAsHtml(int numberOfEntries) {
+    public String getHistoryAsHtml(int numberOfEntries) {
       StringBuilder history = new StringBuilder();
-      history.append("<table cellpadding='5' cellmargin='2'>").append("<th>Command</th>");
-      Iterator<Command> commandsIt = commandsHistory.iterator();
-      for (int i = 0; i < Math.min(numberOfEntries, commandsHistory.size()); i++) {
-        history.append("<tr>").append("<td>").append(commandsIt.next()).append("</td>").append(
-            "</tr>");
+      history
+        .append("<table cellpadding='5' cellmargin='2'>")
+        .append("<th>Clock</th><th>Exits</th><th>Command</th><th>Floor</th>")
+        .append("<th>Direction</th><th>Door</th><th>Users</th><th>Ticks</th><th>Floors</th>");
+      Iterator<State> stateIt = states.iterator();
+      for (int i = 0; i < Math.min(numberOfEntries, states.size()); i++) {
+        State state = stateIt.next();
+        history.append("<tr>")
+          .append("<td>").append(state.stats.ticksClock).append("</td>")
+          .append("<td>").append(state.stats.totalExits).append("</td>")
+          .append("<td>").append(state.command).append("</td>")
+          .append("<td>").append(state.floor).append("</td>")
+          .append("<td>").append(state.dir).append("</td>")
+          .append("<td>").append(state.door).append("</td>")
+          .append("<td>").append(state.stats.nbWait).append(" | ").append(state.stats.nbIn).append("</td>")
+          .append("<td>").append(state.stats.waitingTicks).append(" | ").append(state.stats.inboardTicks).append("</td>")
+          .append("<td>").append(state.stats.nbFloorsAsEntry).append(" | ").append(state.stats.nbFloorsAsExit).append("</td>")
+          .append("</tr>");
       }
       history.append("</table>");
       return history.toString();
     }
+
+
   }
 
   public int getHigherFloor() {
@@ -134,13 +179,11 @@ public class Elevator implements ElevatorState, ElevatorController {
     return stateHistory.getHistoryAsHtml(numberOfEntries);
   }
 
-  public String getCommandHistoryAsHtml(int numberOfEntries) {
-    return stateHistory.getCommandHistoryAsHtml(numberOfEntries);
-  }
-
   private void resetState(int lowerFloor, int higherFloor) {
     this.lowerFloor = lowerFloor;
     this.higherFloor = higherFloor;
+    clockTicks = 0;
+    totalExits = 0;
     currentFloor = 0;
     doorState = Door.CLOSED;
     currentDirection = Direction.UP;
@@ -183,19 +226,21 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   public Elevator userHasExited() {
     elevatorUsers.userExited(currentFloor);
+    totalExits++;
     return this;
   }
 
   public Command nextCommand() {
     ajustDirection();
     Command command = strategy.nextCommand(this, this);
-    recordState(command, getStateAsHtmlString());
+    recordState(command);
     increaseTick();
     logger.info("Command returned: {}", command);
     return command;
   }
 
   private void increaseTick() {
+    clockTicks++;
     waitingUsers.tick();
     elevatorUsers.tick();
   }
@@ -209,8 +254,11 @@ public class Elevator implements ElevatorState, ElevatorController {
     }
   }
 
-  private void recordState(Command command, String stateAsHtml) {
-    stateHistory.add(command, stateAsHtml);
+  private void recordState(Command command) {
+    Stats stats = new Stats(clockTicks, totalExits, waitingUsers.nbUsers(), elevatorUsers.nbUsers(),
+        waitingUsers.getTotalTicks(), elevatorUsers.getTotalTicks(), 0, 0);
+    State state = new State(command, currentFloor, currentDirection, doorState, stats, getStateAsHtmlString());
+    stateHistory.add(state);
   }
 
   /* (non-Javadoc)
@@ -295,14 +343,6 @@ public class Elevator implements ElevatorState, ElevatorController {
   private int scoreInDirection(Direction direction) {
     return elevatorUsers.scoreToward(direction, currentFloor, higherFloor)
         + waitingUsers.scoreToward(direction, currentFloor, higherFloor);
-  }
-
-  /* (non-Javadoc)
-   * @see org.nca.elevator.ElevatorState#isStale()
-   */
-  @Override
-  public boolean isStale() {
-    return stateHistory.isStaleSince(3);
   }
 
   @Override

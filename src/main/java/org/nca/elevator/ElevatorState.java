@@ -24,8 +24,6 @@ public interface ElevatorState {
 
   int nbUsersInOppositeDirection();
 
-  boolean isStale();
-
   int scoreInCurrentDirection();
 
   int scoreInOppositeDirection();
