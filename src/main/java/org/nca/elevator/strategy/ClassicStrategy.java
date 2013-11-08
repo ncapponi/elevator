@@ -33,12 +33,7 @@ public class ClassicStrategy implements ElevatorStrategy {
       }
     }
     else if (e.hasDoorOpen()) {
-      if (wasNotWaitingJustBefore(e) && e.hasWaitingUserForCurrentFloor()) {
-        command = c.doNothing(); // wait for user to enter
-      }
-      else {
-        command = c.closeDoor(); // move on
-      }
+      command = c.closeDoor(); // move on
     }
     else {
       logger.error("Should never happen, unexpected state {}", e.getStateAsString());
