@@ -33,14 +33,14 @@ class ElevatorUsers {
     public ElevatorUser userRequestedFloor(int requestedFloor, int currentFloor) {
         // known users
         for (ElevatorUser user : users) {
-            if (user.canExitAt(requestedFloor)) {
+            if (user.getEntryFloor()==currentFloor && user.getTicks()==0 && user.canExitAt(requestedFloor)) {
                 user.setExitAt(requestedFloor);
                 return user;
             }
         }
         // possible users
         for (ElevatorUser user : users) {
-            if (user.couldExitAt(requestedFloor)) {
+            if (user.getEntryFloor()==currentFloor && user.getTicks()==0 && user.couldExitAt(requestedFloor)) {
                 user.setExitAt(requestedFloor);
                 return user;
             }

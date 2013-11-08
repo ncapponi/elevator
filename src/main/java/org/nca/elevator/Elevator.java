@@ -33,6 +33,19 @@ public class Elevator implements ElevatorState, ElevatorController {
     resetState(0, 19);
   }
 
+  private void resetState(int lowerFloor, int higherFloor) {
+    this.lowerFloor = lowerFloor;
+    this.higherFloor = higherFloor;
+    clockTicks = 0;
+    totalExits = 0;
+    currentFloor = 0;
+    doorState = Door.CLOSED;
+    currentDirection = Direction.UP;
+    stateHistory = new StateHistory();
+    waitingUsers = new WaitingUsers();
+    elevatorUsers = new ElevatorUsers();
+  }
+
   public static enum Command {
     NOTHING, OPEN, CLOSE, UP, DOWN;
   }
@@ -177,19 +190,6 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   public String getHistoryAsHtml(int numberOfEntries) {
     return stateHistory.getHistoryAsHtml(numberOfEntries);
-  }
-
-  private void resetState(int lowerFloor, int higherFloor) {
-    this.lowerFloor = lowerFloor;
-    this.higherFloor = higherFloor;
-    clockTicks = 0;
-    totalExits = 0;
-    currentFloor = 0;
-    doorState = Door.CLOSED;
-    currentDirection = Direction.UP;
-    stateHistory = new StateHistory();
-    waitingUsers = new WaitingUsers();
-    elevatorUsers = new ElevatorUsers();
   }
 
   void setStrategy(ElevatorStrategy newStrategy) {

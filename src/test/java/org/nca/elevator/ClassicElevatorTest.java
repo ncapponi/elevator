@@ -87,7 +87,7 @@ public class ClassicElevatorTest {
   }
 
   ClassicElevatorTest positionToFloorWithDoorOpened(int floor) {
-    callUp(0).open().enter().close().go(floor);
+    callUp(0).open().enter().go(floor).close();
     up(floor);
     open().exit();
     return this;
