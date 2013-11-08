@@ -377,17 +377,24 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   @Override
   public Command goCurrentDirection() {
-    currentFloor = currentFloor + (currentDirection == Direction.UP ? 1 : -1);
-    return currentDirection.toCommand();
+    return go(currentDirection);
   }
 
   @Override
   public Command goOppositeDirection() {
     currentDirection = currentDirection.flip();
-    currentFloor = currentFloor + (currentDirection == Direction.UP ? 1 : -1);
-    return currentDirection.toCommand();
+    return go(currentDirection);
   }
 
+  public Command go(Direction direction) {
+    switch (direction) {
+    case UP: return goUp();
+    case DOWN: return goDown();
+    default:
+      return Command.NOTHING;
+    }
+  }
+  
   @Override
   public Command goToMiddleFloor() {
     int middleFloor = lowerFloor + (higherFloor - lowerFloor) / 2;
