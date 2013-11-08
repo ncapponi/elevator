@@ -390,16 +390,26 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   @Override
   public Command goToMiddleFloor() {
-    int middleFloor = (higherFloor + lowerFloor) / 2;
+    int middleFloor = lowerFloor + (higherFloor - lowerFloor) / 2;
     if (currentFloor > middleFloor) {
-      return Command.DOWN;
+      return goDown();
     }
     else if (currentFloor < middleFloor) {
-      return Command.UP;
+      return goUp();
     }
     else {
       return Command.NOTHING;
     }
+  }
+
+  public Command goDown() {
+    currentFloor--;
+    return Command.DOWN;
+  }
+  
+  public Command goUp() {
+    currentFloor++;
+    return Command.UP;
   }
 
   @Override
