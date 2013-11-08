@@ -13,7 +13,7 @@ class ElevatorUser implements Comparable<ElevatorUser> {
     private static final int UNSET_EXIT_FLOOR = -1;
 
     private final int entryFloor;
-    private final Direction direction;
+    private Direction direction;
     private int exitFloor;
     private final int waitingTicks;
     private int ticks;
@@ -51,6 +51,9 @@ class ElevatorUser implements Comparable<ElevatorUser> {
     public ElevatorUser setExitAt(int floor) {
         if (!hasExitFloor()) {
             exitFloor = floor;
+            if (direction==Direction.NONE) {
+              direction = exitFloor > entryFloor ? Direction.UP : direction.DOWN;
+            }
         } else {
             logger.error("Error : Can't set exit twice for elevator user: {}, at floor {}", this, floor);
         }
@@ -114,7 +117,7 @@ class ElevatorUser implements Comparable<ElevatorUser> {
 
     /**
      * Shameless copy of server code, to compute minimum number of ticks from
-     * one floor to another. {@link https 
+     * one floor to another. {@link https
      * ://github.com/xebia-france/code-elevator
      * /blob/master/elevator-server/src/main/java/elevator /server/Score.java }
      */
@@ -179,6 +182,6 @@ class ElevatorUser implements Comparable<ElevatorUser> {
         return true;
     }
 
-    
+
 
 }
