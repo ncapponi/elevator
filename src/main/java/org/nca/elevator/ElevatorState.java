@@ -14,6 +14,8 @@ public interface ElevatorState {
 
   boolean hasWaitingUserForCurrentFloor();
 
+  boolean hasWaitingUserForCurrentFloorInCurrentDirection();
+
   boolean hasElevatorUserForCurrentFloor();
 
   boolean hasUsersInCurrentDirection();
@@ -32,5 +34,8 @@ public interface ElevatorState {
 
   String getStateAsString();
 
+  int nbUsersWaiting();
+
+  int nbUsersInElevator();
 
 }

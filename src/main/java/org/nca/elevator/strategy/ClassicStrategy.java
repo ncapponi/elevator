@@ -42,13 +42,9 @@ public class ClassicStrategy implements ElevatorStrategy {
     return command;
   }
 
-  private boolean wasNotWaitingJustBefore(ElevatorState e) {
-    Command last = e.lastCommand();
-    return last == null || !last.equals(Command.NOTHING);
-  }
-
   private boolean hasSomeUserForThisFloor(ElevatorState e) {
-    return e.hasWaitingUserForCurrentFloor() || e.hasElevatorUserForCurrentFloor();
+    return e.hasElevatorUserForCurrentFloor() || e.hasWaitingUserForCurrentFloorInCurrentDirection() ||
+        (e.hasWaitingUserForCurrentFloor() && e.nbUsersInCurrentDirection()==0);
   }
 
   private boolean wasNotClosedJustBefore(ElevatorState e) {

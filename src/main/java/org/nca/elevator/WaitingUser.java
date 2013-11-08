@@ -25,6 +25,10 @@ class WaitingUser implements Comparable<WaitingUser> {
         return direction;
     }
 
+    public boolean hasCompatibleDirection(Direction dir) {
+      return direction==dir || direction==Direction.NONE;
+    }
+
     /**
      * Returns the score malus to apply to this user when elevator is at
      * provided floor.
@@ -88,5 +92,5 @@ class WaitingUser implements Comparable<WaitingUser> {
             return false;
         return true;
     }
-    
+
 }

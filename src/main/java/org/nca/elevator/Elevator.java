@@ -282,7 +282,12 @@ public class Elevator implements ElevatorState, ElevatorController {
    */
   @Override
   public boolean hasWaitingUserForCurrentFloor() {
-    return waitingUsers.hasUserFor(currentFloor);
+    return waitingUsers.hasUserForFloor(currentFloor);
+  }
+
+  @Override
+  public boolean hasWaitingUserForCurrentFloorInCurrentDirection() {
+    return waitingUsers.hasUserForFloorInDirection(currentFloor, currentDirection);
   }
 
   /* (non-Javadoc)
@@ -309,6 +314,16 @@ public class Elevator implements ElevatorState, ElevatorController {
   private boolean hasUsersInDirection(Direction direction) {
     return elevatorUsers.hasUserToward(direction, currentFloor)
         || waitingUsers.hasUserToward(direction, currentFloor, higherFloor);
+  }
+
+  @Override
+  public int nbUsersWaiting() {
+    return waitingUsers.nbUsers();
+  }
+
+  @Override
+  public int nbUsersInElevator() {
+    return elevatorUsers.nbUsers();
   }
 
   @Override
@@ -394,7 +409,7 @@ public class Elevator implements ElevatorState, ElevatorController {
       return Command.NOTHING;
     }
   }
-  
+
   @Override
   public Command goToMiddleFloor() {
     int middleFloor = lowerFloor + (higherFloor - lowerFloor) / 2;
@@ -413,7 +428,7 @@ public class Elevator implements ElevatorState, ElevatorController {
     currentFloor--;
     return Command.DOWN;
   }
-  
+
   public Command goUp() {
     currentFloor++;
     return Command.UP;

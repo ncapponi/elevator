@@ -72,9 +72,22 @@ class WaitingUsers {
         return nbUsersToward(direction, currentFloor, higherFloor) > 0;
     }
 
-    public boolean hasUserFor(int floor) {
-        return nbUsersFor(floor) > 0;
+    public boolean hasUserForFloorInDirection(int floor, Direction direction) {
+        return nbUsersFor(floor, direction) > 0;
     }
+
+    public boolean hasUserForFloor(int floor) {
+      return nbUsersFor(floor) > 0;
+    }
+
+    public int nbUsersFor(int floor, Direction dir) {
+      int number = 0;
+      for (WaitingUser user : users) {
+          if (user.isWaitingAt(floor) && user.hasCompatibleDirection(dir))
+              number++;
+      }
+      return number;
+   }
 
     public int nbUsersFor(int floor) {
         int number = 0;

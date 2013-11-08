@@ -6,7 +6,6 @@ import static org.nca.elevator.Elevator.Command.DOWN;
 import static org.nca.elevator.Elevator.Command.OPEN;
 import static org.nca.elevator.Elevator.Command.UP;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.nca.elevator.Elevator.Command;
 import org.nca.elevator.strategy.ClassicStrategy;
@@ -18,38 +17,79 @@ public class ClassicElevatorTest {
   Elevator e = new Elevator(new ClassicStrategy());
 
   @Test
-  public void goUp() throws Exception {
+  public void oneUserGoUp() throws Exception {
     numberOfFloors(5);
 
-    callUp(0).callUp(0);
-    expect(OPEN);
-    enter().enter().go(2).go(3);
-    expect(CLOSE).expect(UP).expect(UP).expect(OPEN).exit().expect(CLOSE).expect(UP).expect(OPEN);
+    callUp(0);
+    open().enter().go(3).close();
+    up(3);
+    open().exit().close();
+    end();
   }
 
   @Test
-  @Ignore
-  // to fix
-  public void goDown() throws Exception {
-    numberOfFloors(5).positionToWithDoorOpened(4);
+  public void oneUserGoDown() throws Exception {
+    numberOfFloors(5).positionToFloorWithDoorOpened(4);
 
-    callUp(4).callUp(4).enter().enter().go(2).go(1);
-    expect(CLOSE).expect(DOWN).expect(DOWN).expect(OPEN).exit().expect(CLOSE).expect(DOWN).expect(
-        OPEN);
+    callDown(4);
+    enter().go(1).close();
+    down(3);
+    open().exit().close();
+    end();
   }
 
-  // Helper methods to write the scenarios
+  @Test
+  public void twoUserUserGoUp() throws Exception {
+    numberOfFloors(5);
+
+    callUp(0).callUp(2);
+    open().enter().go(3).close();
+    up(2);
+    open().enter().go(4).close();
+    up(1);
+    open().exit().close();
+    up(1);
+    open().exit().close();
+    end();
+  }
+
+  @Test
+  public void skipUserWaitingForOppositeDirection() throws Exception {
+    numberOfFloors(5);
+
+    callUp(0).callDown(2);
+    open().enter().go(3).close();
+    up(3);
+    open().exit().close();
+    down(1);
+    open().enter().go(1).close();
+    down(1);
+    open().exit().close();
+    end();
+  }
+
+  @Test
+  public void serveUserWaitingForOppositeDirectionIfLastOneInDirection() throws Exception {
+    numberOfFloors(5);
+
+    callDown(2);
+    up(2);
+    open().enter().go(1).close();
+    down(1);
+    open().exit().close();
+    end();
+  }
+
+  // From here, Helper methods to write the scenarios
   ClassicElevatorTest numberOfFloors(int numberOfFloors) {
     e.reset(0, numberOfFloors - 1);
     return this;
   }
 
-  ClassicElevatorTest positionToWithDoorOpened(int floor) {
-    callUp(0).expect(OPEN).enter().expect(CLOSE).go(floor);
-    for (int i = 0; i < floor; i++) {
-      expect(UP);
-    }
-    expect(OPEN).exit();
+  ClassicElevatorTest positionToFloorWithDoorOpened(int floor) {
+    callUp(0).open().enter().close().go(floor);
+    up(floor);
+    open().exit();
     return this;
   }
 
@@ -78,8 +118,57 @@ public class ClassicElevatorTest {
     return this;
   }
 
+  ClassicElevatorTest up(int count) {
+    return go(UP,  count);
+  }
+
+  ClassicElevatorTest down(int count) {
+    return go(DOWN,  count);
+  }
+
+  ClassicElevatorTest upAndOpen(int count) {
+    return goAndOpen(UP,  count);
+  }
+
+  ClassicElevatorTest downAndOpen(int count) {
+    return goAndOpen(DOWN,  count);
+  }
+
+  ClassicElevatorTest go(Command command, int count) {
+    for (int i = 0; i < count; i++) {
+      expect(command);
+    }
+    return this;
+  }
+
+  ClassicElevatorTest goAndOpen(Command command, int count) {
+    for (int i = 0; i < count; i++) {
+      expect(command);
+    }
+    return open();
+  }
+
+  ClassicElevatorTest close() {
+    return expect(CLOSE);
+  }
+
+  ClassicElevatorTest open() {
+    return expect(OPEN);
+  }
+
   ClassicElevatorTest expect(Command command) {
-    assertThat(e.nextCommand()).isEqualTo(command);
+    assertThat(e.nextCommand()).as("command not as expected").isEqualTo(command);
+    return this;
+  }
+
+  ClassicElevatorTest end() {
+    end(0,0);
+    return this;
+  }
+
+  ClassicElevatorTest end(int waiting, int inElevator) {
+    assertThat(e.nbUsersWaiting()).as("wrong number of users waiting").isEqualTo(waiting);
+    assertThat(e.nbUsersInElevator()).as("wrong number of users in the elevator").isEqualTo(inElevator);
     return this;
   }
 }
