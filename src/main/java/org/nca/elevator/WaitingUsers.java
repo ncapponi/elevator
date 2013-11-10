@@ -1,13 +1,12 @@
 package org.nca.elevator;
 
-import static java.lang.Math.abs;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.nca.elevator.Elevator.Direction;
+import org.nca.elevator.Elevator.Optimization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,12 +47,12 @@ class WaitingUsers {
         return selectedUser;
     }
 
-    public int nbUsersToward(Direction direction, int currentFloor, int higherFloor) {
+    public int nbUsersToward(Direction direction, int currentFloor, int higherFloor, Optimization optimization) {
         int min = direction == Direction.UP ? currentFloor + 1 : 0;
         int max = direction == Direction.UP ? higherFloor : currentFloor - 1;
         int count = 0;
         for (int floor = min; floor <= max; floor++) {
-            count += nbUsersFor(floor);
+            count += nbUsersForFloor(floor, optimization);
         }
         return count;
     }
@@ -63,39 +62,46 @@ class WaitingUsers {
         int max = direction == Direction.UP ? higherFloor : currentFloor - 1;
         int score = 0;
         for (int floor = min; floor <= max; floor++) {
-            score += (higherFloor - abs(currentFloor - floor)) * nbUsersFor(floor);
+            score += (higherFloor - Math.abs(currentFloor - floor)) * nbUsersForFloor(floor, Optimization.NONE);
         }
         return score;
     }
 
     public boolean hasUserToward(Direction direction, int currentFloor, int higherFloor) {
-        return nbUsersToward(direction, currentFloor, higherFloor) > 0;
+        return nbUsersToward(direction, currentFloor, higherFloor, Optimization.NONE) > 0;
     }
 
-    public boolean hasUserForFloorInDirection(int floor, Direction direction) {
-        return nbUsersFor(floor, direction) > 0;
+    public boolean hasUserForFloorInDirection(int floor, Direction direction, Optimization optimization) {
+        return nbUsersForFloorInDirection(floor, direction, optimization) > 0;
     }
 
     public boolean hasUserForFloor(int floor) {
-      return nbUsersFor(floor) > 0;
+      return nbUsersForFloor(floor, Optimization.NONE) > 0;
     }
 
-    public int nbUsersFor(int floor, Direction dir) {
+    public int nbUsersForFloorInDirection(int floor, Direction dir, Optimization optimization) {
       int number = 0;
       for (WaitingUser user : users) {
-          if (user.isWaitingAt(floor) && user.hasCompatibleDirection(dir))
-              number++;
+          boolean hasCompatibleDirection = dir==Direction.NONE || user.hasCompatibleDirection(dir);
+          if (user.isWaitingAt(floor) && hasCompatibleDirection) {
+              switch (optimization) {
+              case POINTS:
+                  if (user.estimateMaximumPointsToEarn() > 0) {
+                      number++;
+                  } else {
+                      logger.info("Ignoring waiting user because no points to earn");
+                  }
+              case NONE:
+              default:
+                  number++;
+              }
+          }
       }
       return number;
    }
 
-    public int nbUsersFor(int floor) {
-        int number = 0;
-        for (WaitingUser user : users) {
-            if (user.isWaitingAt(floor))
-                number++;
-        }
-        return number;
+    public int nbUsersForFloor(int floor, Optimization optimization) {
+        return nbUsersForFloorInDirection(floor, Direction.NONE, optimization);
     }
 
     public int nbUsers() {

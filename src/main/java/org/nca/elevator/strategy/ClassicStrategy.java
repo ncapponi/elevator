@@ -44,7 +44,7 @@ public class ClassicStrategy implements ElevatorStrategy {
 
   private boolean hasSomeUserForThisFloor(ElevatorState e) {
     return e.hasElevatorUserForCurrentFloor() || e.hasWaitingUserForCurrentFloorInCurrentDirection() ||
-        (e.hasWaitingUserForCurrentFloor() && e.nbUsersInCurrentDirection()==0);
+        (e.hasWaitingUserForCurrentFloor() && !e.hasUsersInCurrentDirection());
   }
 
   private boolean wasNotClosedJustBefore(ElevatorState e) {

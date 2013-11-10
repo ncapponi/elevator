@@ -4,6 +4,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.junit.Test;
 import org.nca.elevator.Elevator.Direction;
+import org.nca.elevator.Elevator.Optimization;
 
 public class ElevatorUsersTest {
 
@@ -46,7 +47,7 @@ public class ElevatorUsersTest {
     users.userRequestedFloor(3, 0);
 
     assertThat(users.userExited(3)).isGreaterThan(0);
-    assertThat(users.nbUsersFor(3)).isEqualTo(0);
+    assertThat(users.nbUsersForFloor(3)).isEqualTo(0);
   }
 
   @Test
@@ -56,7 +57,7 @@ public class ElevatorUsersTest {
 
     // no explicit requested floor
     assertThat(users.userExited(3)).isGreaterThan(0);
-    assertThat(users.nbUsersFor(3)).isEqualTo(0);
+    assertThat(users.nbUsersForFloor(3)).isEqualTo(0);
   }
 
   @Test
@@ -66,7 +67,7 @@ public class ElevatorUsersTest {
 
     // no explicit requested floor
     assertThat(users.userExited(3)).isGreaterThan(0);
-    assertThat(users.nbUsersFor(3)).isEqualTo(0);
+    assertThat(users.nbUsersForFloor(3)).isEqualTo(0);
   }
 
   @Test
@@ -77,8 +78,8 @@ public class ElevatorUsersTest {
     users.userEntered(new WaitingUser(2, Direction.NONE));
 
     assertThat(users.userExited(3)).isGreaterThan(0);
-    assertThat(users.nbUsersFor(3)).isEqualTo(0);
-    assertThat(users.nbUsersToward(Direction.DOWN, 3)).isEqualTo(1); // match unknown direction
+    assertThat(users.nbUsersForFloor(3)).isEqualTo(0);
+    assertThat(users.nbUsersTowardDirection(Direction.DOWN, 3, Optimization.NONE)).isEqualTo(1); // match unknown direction
   }
 
   @Test
@@ -87,30 +88,12 @@ public class ElevatorUsersTest {
     users.userEntered(new WaitingUser(0, Direction.UP));
     users.userRequestedFloor(3, 0);
 
-    assertThat(users.hasUserFor(0)).isFalse();
-    assertThat(users.hasUserFor(1)).isFalse();
-    assertThat(users.hasUserFor(2)).isFalse();
-    assertThat(users.hasUserFor(3)).isTrue();
-    assertThat(users.hasUserFor(4)).isFalse();
-    assertThat(users.hasUserFor(5)).isFalse();
-  }
-
-  @Test
-  public void hasUserTowardDirectionFromFloor() throws Exception {
-    ElevatorUsers users = new ElevatorUsers();
-    users.userEntered(new WaitingUser(0, Direction.UP));
-    users.userRequestedFloor(3, 0);
-
-    assertThat(users.hasUserToward(Direction.UP, 0)).isTrue();
-    assertThat(users.hasUserToward(Direction.UP, 1)).isTrue();
-    assertThat(users.hasUserToward(Direction.UP, 2)).isTrue();
-    assertThat(users.hasUserToward(Direction.UP, 3)).isFalse();
-    assertThat(users.hasUserToward(Direction.UP, 4)).isFalse();
-
-    assertThat(users.hasUserToward(Direction.DOWN, 5)).isTrue();
-    assertThat(users.hasUserToward(Direction.DOWN, 4)).isTrue();
-    assertThat(users.hasUserToward(Direction.DOWN, 3)).isFalse();
-    assertThat(users.hasUserToward(Direction.DOWN, 2)).isFalse();
+    assertThat(users.hasUserForFloor(0, Optimization.NONE)).isFalse();
+    assertThat(users.hasUserForFloor(1, Optimization.NONE)).isFalse();
+    assertThat(users.hasUserForFloor(2, Optimization.NONE)).isFalse();
+    assertThat(users.hasUserForFloor(3, Optimization.NONE)).isTrue();
+    assertThat(users.hasUserForFloor(4, Optimization.NONE)).isFalse();
+    assertThat(users.hasUserForFloor(5, Optimization.NONE)).isFalse();
   }
 
   @Test
@@ -121,11 +104,11 @@ public class ElevatorUsersTest {
     users.userRequestedFloor(2, 0);
     users.userRequestedFloor(3, 0);
 
-    assertThat(users.nbUsersToward(Direction.UP, 0)).isEqualTo(2);
-    assertThat(users.nbUsersToward(Direction.UP, 1)).isEqualTo(2);
-    assertThat(users.nbUsersToward(Direction.UP, 2)).isEqualTo(1);
-    assertThat(users.nbUsersToward(Direction.UP, 3)).isEqualTo(0);
-    assertThat(users.nbUsersToward(Direction.UP, 4)).isEqualTo(0);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 0, Optimization.NONE)).isEqualTo(2);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 1, Optimization.NONE)).isEqualTo(2);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 2, Optimization.NONE)).isEqualTo(1);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 3, Optimization.NONE)).isEqualTo(0);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 4, Optimization.NONE)).isEqualTo(0);
 
   }
 
@@ -137,10 +120,10 @@ public class ElevatorUsersTest {
     users.userRequestedFloor(2, 0);
     users.userRequestedFloor(2, 0);
 
-    assertThat(users.nbUsersToward(Direction.UP, 0)).isEqualTo(2);
-    assertThat(users.nbUsersToward(Direction.UP, 1)).isEqualTo(2);
-    assertThat(users.nbUsersToward(Direction.UP, 2)).isEqualTo(0);
-    assertThat(users.nbUsersToward(Direction.UP, 3)).isEqualTo(0);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 0, Optimization.NONE)).isEqualTo(2);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 1, Optimization.NONE)).isEqualTo(2);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 2, Optimization.NONE)).isEqualTo(0);
+    assertThat(users.nbUsersTowardDirection(Direction.UP, 3, Optimization.NONE)).isEqualTo(0);
 
   }
 

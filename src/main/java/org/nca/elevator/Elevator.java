@@ -26,10 +26,16 @@ public class Elevator implements ElevatorState, ElevatorController {
   private StateHistory stateHistory;
 
   private ElevatorStrategy strategy;
+  private Optimization optimization;
 
   public Elevator(ElevatorStrategy strategy) {
-    logger.info("Initialising elevator with strategy {}", strategy.getClass());
+    this(strategy, Optimization.NONE);
+  }
+
+  public Elevator(ElevatorStrategy strategy, Optimization optimization) {
+    logger.info("Initialising elevator with strategy {} and optimization {}", strategy.getClass(), optimization);
     this.strategy = strategy;
+    this.optimization = optimization;
     resetState(0, 19);
   }
 
@@ -44,6 +50,11 @@ public class Elevator implements ElevatorState, ElevatorController {
     stateHistory = new StateHistory();
     waitingUsers = new WaitingUsers();
     elevatorUsers = new ElevatorUsers();
+  }
+
+  public static enum Optimization {
+    NONE, // no optimization
+    POINTS // optimization based on points
   }
 
   public static enum Command {
@@ -181,7 +192,6 @@ public class Elevator implements ElevatorState, ElevatorController {
       return history.toString();
     }
 
-
   }
 
   public int getHigherFloor() {
@@ -195,6 +205,11 @@ public class Elevator implements ElevatorState, ElevatorController {
   void setStrategy(ElevatorStrategy newStrategy) {
     logger.info("--- Changing strategy to {} ---", newStrategy);
     this.strategy = newStrategy;
+  }
+
+  void setOptimization(Optimization optim) {
+    logger.info("--- Changing optimization to {} ---", optim);
+    this.optimization = optim;
   }
 
   Class<? extends ElevatorStrategy> getStrategy() {
@@ -287,15 +302,12 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   @Override
   public boolean hasWaitingUserForCurrentFloorInCurrentDirection() {
-    return waitingUsers.hasUserForFloorInDirection(currentFloor, currentDirection);
+    return waitingUsers.hasUserForFloorInDirection(currentFloor, currentDirection, optimization);
   }
 
-  /* (non-Javadoc)
-   * @see org.nca.elevator.ElevatorState#hasElevatorUserForCurrentFloor()
-   */
   @Override
   public boolean hasElevatorUserForCurrentFloor() {
-    return elevatorUsers.hasUserFor(currentFloor);
+    return elevatorUsers.hasUserForFloor(currentFloor, optimization);
   }
 
   @Override
@@ -303,17 +315,13 @@ public class Elevator implements ElevatorState, ElevatorController {
     return hasUsersInDirection(currentDirection);
   }
 
-  /* (non-Javadoc)
-   * @see org.nca.elevator.ElevatorState#hasUsersInOppositeDirection()
-   */
   @Override
   public boolean hasUsersInOppositeDirection() {
     return hasUsersInDirection(currentDirection.flip());
   }
 
   private boolean hasUsersInDirection(Direction direction) {
-    return elevatorUsers.hasUserToward(direction, currentFloor)
-        || waitingUsers.hasUserToward(direction, currentFloor, higherFloor);
+    return nbUsersInDirection(direction) > 0;
   }
 
   @Override
@@ -351,12 +359,12 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   private int nbUsersInDirection(Direction direction) {
-    return elevatorUsers.nbUsersToward(direction, currentFloor)
-        + waitingUsers.nbUsersToward(direction, currentFloor, higherFloor);
+    return elevatorUsers.nbUsersTowardDirection(direction, currentFloor, optimization)
+        + waitingUsers.nbUsersToward(direction, currentFloor, higherFloor, optimization);
   }
 
   private int scoreInDirection(Direction direction) {
-    return elevatorUsers.scoreToward(direction, currentFloor, higherFloor)
+    return elevatorUsers.scoreTowardDirection(direction, currentFloor, higherFloor)
         + waitingUsers.scoreToward(direction, currentFloor, higherFloor);
   }
 

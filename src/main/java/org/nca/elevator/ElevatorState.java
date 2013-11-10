@@ -12,6 +12,10 @@ public interface ElevatorState {
 
   boolean hasDoorOpen();
 
+  int nbUsersWaiting();
+
+  int nbUsersInElevator();
+
   boolean hasWaitingUserForCurrentFloor();
 
   boolean hasWaitingUserForCurrentFloorInCurrentDirection();
@@ -33,9 +37,5 @@ public interface ElevatorState {
   Command lastCommand();
 
   String getStateAsString();
-
-  int nbUsersWaiting();
-
-  int nbUsersInElevator();
 
 }

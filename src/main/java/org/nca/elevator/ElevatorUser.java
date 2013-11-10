@@ -1,7 +1,5 @@
 package org.nca.elevator;
 
-import static java.lang.Math.abs;
-
 import org.nca.elevator.Elevator.Direction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,37 +96,20 @@ class ElevatorUser implements Comparable<ElevatorUser> {
     }
 
     /**
-     * Returns the estimated score for this user if elevator goes straight to
-     * exit floor when it is at provided floor.
+     * Returns the estimated points for this user if elevator goes to
+     * exit floor when it is at provided floor, with an estimated number
+     * of stops between.
      */
-    public int estimateScore(int currentFloor) {
-        // based on Score#score method
-        return 20 - ticks - bestTickToGo(currentFloor, exitFloor) - (waitingTicks / 2)
-                + bestTickToGo(entryFloor, exitFloor);
+    public int estimatePointsEarned(int currentFloor, int numberOfStops) {
+        return Score.estimatePointsEarned(entryFloor, exitFloor, waitingTicks, ticks, currentFloor, numberOfStops);
     }
 
     /**
      * Return the final score for this user. Only valid if called when user
      * exits.
      */
-    public int getFinalScore() {
-        return 20 - ticks - (waitingTicks / 2) + bestTickToGo(entryFloor, exitFloor);
-    }
-
-    /**
-     * Shameless copy of server code, to compute minimum number of ticks from
-     * one floor to another. {@link https
-     * ://github.com/xebia-france/code-elevator
-     * /blob/master/elevator-server/src/main/java/elevator /server/Score.java }
-     */
-    private Integer bestTickToGo(Integer floor, Integer floorToGo) {
-        // elevator is OPEN at floor
-        final Integer elevatorHasToCloseDoorsWhenAtFloor = 1;
-        final Integer elevatorGoesStraightFromFloorToFloorToGo = abs(floorToGo - floor);
-        final Integer elevatorHasToOpenDoorsWhenAtFloorToGo = 1;
-
-        return elevatorHasToCloseDoorsWhenAtFloor + elevatorGoesStraightFromFloorToFloorToGo
-                + elevatorHasToOpenDoorsWhenAtFloorToGo;
+    public int getFinalPointsEarned() {
+        return Score.maxPointsToEarnInElevator(entryFloor, exitFloor, waitingTicks, ticks);
     }
 
     @Override

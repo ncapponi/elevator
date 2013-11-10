@@ -29,13 +29,9 @@ class WaitingUser implements Comparable<WaitingUser> {
       return direction==dir || direction==Direction.NONE;
     }
 
-    /**
-     * Returns the score malus to apply to this user when elevator is at
-     * provided floor.
-     */
-    public int getScoreMalus(int currentFloor) {
-        // current ticks + ticks to go to user floor + tick to open door
-        return (ticks + Math.abs(floor - currentFloor) + 1) / 2;
+    /** Returns the maximum number of points that can be earned if user is taken to target floor directly */
+    public  int estimateMaximumPointsToEarn() {
+      return Score.maxPointsToEarnWhenWaiting(ticks);
     }
 
     /**
