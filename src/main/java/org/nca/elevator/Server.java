@@ -88,8 +88,10 @@ public class Server {
                     String entries = request.queryParams("entries");
                     int numberOfEntries = entries == null ? 1 : Integer.valueOf(entries);
                     response.type("text/html");
-                    result = "<p>GRElevator v. " + VERSION + "</p>" + "<p>Using strategy: "
-                            + elevator.getStrategy().getName() + ".</p>" + "<p><b>State</b> :"
+                    result = "<p>GRElevator v. " + VERSION
+                            + "</p>" + "<p>Using strategy: " + elevator.getStrategy().getName()
+                            + " and optimization: " + elevator.getOptimization() + ".</p>"
+                            + "<p><b>State</b> :"
                             + elevator.getHistoryAsHtml(numberOfEntries) + "</p>";
                 } catch (Exception e) {
                     result = e.getMessage();

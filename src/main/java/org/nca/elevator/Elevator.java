@@ -216,6 +216,10 @@ public class Elevator implements ElevatorState, ElevatorController {
     return this.strategy.getClass();
   }
 
+  Optimization getOptimization() {
+      return this.optimization;
+  }
+
   public Elevator reset(int lowerFloor, int higherFloor) {
     resetState(lowerFloor, higherFloor);
     return this;
