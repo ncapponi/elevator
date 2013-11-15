@@ -19,6 +19,7 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   private int lowerFloor, higherFloor;
   private int currentFloor;
+  private int cabinSize;
   private Direction currentDirection;
   private Door doorState;
   private WaitingUsers waitingUsers;
@@ -36,12 +37,13 @@ public class Elevator implements ElevatorState, ElevatorController {
     logger.info("Initialising elevator with strategy {} and optimization {}", strategy.getClass(), optimization);
     this.strategy = strategy;
     this.optimization = optimization;
-    resetState(0, 19);
+    resetState(0, 19, 30);
   }
 
-  private void resetState(int lowerFloor, int higherFloor) {
+  private void resetState(int lowerFloor, int higherFloor, int cabinSize) {
     this.lowerFloor = lowerFloor;
     this.higherFloor = higherFloor;
+    this.cabinSize = cabinSize;
     clockTicks = 0;
     totalExits = 0;
     currentFloor = 0;
@@ -198,6 +200,10 @@ public class Elevator implements ElevatorState, ElevatorController {
     return higherFloor;
   }
 
+  public int getCabinSize() {
+    return cabinSize;
+  }
+
   public String getHistoryAsHtml(int numberOfEntries) {
     return stateHistory.getHistoryAsHtml(numberOfEntries);
   }
@@ -220,8 +226,8 @@ public class Elevator implements ElevatorState, ElevatorController {
       return this.optimization;
   }
 
-  public Elevator reset(int lowerFloor, int higherFloor) {
-    resetState(lowerFloor, higherFloor);
+  public Elevator reset(int lowerFloor, int higherFloor, int cabinSize) {
+    resetState(lowerFloor, higherFloor, cabinSize);
     return this;
   }
 

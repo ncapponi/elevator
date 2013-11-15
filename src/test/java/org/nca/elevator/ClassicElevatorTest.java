@@ -82,7 +82,7 @@ public class ClassicElevatorTest {
 
   // From here, Helper methods to write the scenarios
   ClassicElevatorTest numberOfFloors(int numberOfFloors) {
-    e.reset(0, numberOfFloors - 1);
+    e.reset(0, numberOfFloors - 1, 30);
     return this;
   }
 

@@ -173,14 +173,15 @@ public class Server {
                 String lowerFloor = request.queryParams("lowerFloor");
                 String higherFloor = request.queryParams("higherFloor");
                 String cause = request.queryParams("cause");
+                String cabinSize = request.queryParams("cabinSize");
 
-                logger.info("Resetting elevator from {} to {} because of : {}", lowerFloor,
-                        higherFloor, cause);
+                logger.info("Resetting elevator from {} to {} with max of {} users in the cabin because of : {}", lowerFloor,
+                        higherFloor, cabinSize, cause);
                 if (lowerFloor != null && higherFloor != null) {
-                    elevator.reset(Integer.valueOf(lowerFloor), Integer.valueOf(higherFloor));
+                    elevator.reset(Integer.valueOf(lowerFloor), Integer.valueOf(higherFloor), Integer.valueOf(cabinSize));
                 }
                 else {
-                    elevator.reset(0, 19); // allow to use the not up-to-date elevator server
+                    elevator.reset(0, 19, 30); // allow to use the not up-to-date elevator server
                 }
                 return "";
             }
