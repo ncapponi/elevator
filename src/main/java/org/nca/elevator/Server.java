@@ -25,7 +25,7 @@ import spark.Route;
  */
 public class Server {
 
-    static final String VERSION = "1.0";
+    static final String VERSION = "1.1";
 
     static final Logger logger = LoggerFactory.getLogger(Server.class);
 
@@ -154,8 +154,13 @@ public class Server {
         get(new Route("/userHasEntered") {
             @Override
             public Object handle(Request request, Response response) {
-                elevator.userHasEntered();
-                return "";
+                try {
+                  elevator.userHasEntered();
+                  return "";
+                } catch (Exception e) {
+                  response.status(500); // TODO find a more accurate status code
+                  return e.getMessage();
+                }
             }
         });
 
