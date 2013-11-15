@@ -17,19 +17,6 @@ public class ClassicElevatorTest {
   Elevator e = new Elevator(new ClassicStrategy());
 
   @Test
-  public void cabinIsFull() throws Exception {
-    numberOfFloors(1, 3);
-    
-    // 2 users : not full
-    enter().enter();
-    assertThat(e.isCabinFull()).isEqualTo(false);
-
-    // One more user : cabin is full !
-    enter();
-    assertThat(e.isCabinFull()).isEqualTo(true);
-  }
-  
-  @Test
   public void oneUserGoUp() throws Exception {
     numberOfFloors(5);
 
@@ -93,6 +80,59 @@ public class ClassicElevatorTest {
     end();
   }
 
+  @Test
+  public void cabinIsFull() throws Exception {
+    numberOfFloors(1, 3);
+    
+    // 2 users : not full
+    enter().enter();
+    assertThat(e.isCabinFull()).isFalse();
+
+    // One more user : cabin is full !
+    enter();
+    assertThat(e.isCabinFull()).isTrue();
+  }
+  
+  @Test
+  public void userIsWaitingButCabinIsFull() throws Exception {
+    numberOfFloors(3, 1);
+    
+    // 1 user entered on the current floor : then the cabin is full
+    callUp(0);
+    open().enter().go(2).close();
+    assertThat(e.isCabinFull()).isTrue();
+    // Someone is calling on the 1st floor to go down
+    callDown(1);
+    // We should not stop to open for the waiting user as the cabin is full
+    up(2);
+    exitUser();
+    down(1);
+    open().enter().go(0).close();
+    down(1);
+    exitUser();
+  }
+
+  ClassicElevatorTest exitUser() {
+    return exitUser(1);
+  }
+
+  ClassicElevatorTest exitUser(int count) {
+    open();
+    for (int i=0; i < count ; i++) {
+      exit();
+    }
+    return close();
+  }
+  
+  ClassicElevatorTest enterUsers(int[] floorsToGo) {
+    open();
+    for (int i = 0; i < floorsToGo.length; i++) {
+      enter();
+      go(floorsToGo[i]);
+    }
+    return close();
+  }
+  
   // From here, Helper methods to write the scenarios
   ClassicElevatorTest numberOfFloors(int numberOfFloors) {
     return numberOfFloors(numberOfFloors, 30);
@@ -153,15 +193,13 @@ public class ClassicElevatorTest {
 
   ClassicElevatorTest go(Command command, int count) {
     for (int i = 0; i < count; i++) {
-      expect(command);
+      expect(command, count, i);
     }
     return this;
   }
 
   ClassicElevatorTest goAndOpen(Command command, int count) {
-    for (int i = 0; i < count; i++) {
-      expect(command);
-    }
+    go(count);
     return open();
   }
 
@@ -174,7 +212,15 @@ public class ClassicElevatorTest {
   }
 
   ClassicElevatorTest expect(Command command) {
-    assertThat(e.nextCommand()).as("command not as expected").isEqualTo(command);
+    return expect(command, "command not as expected");
+  }
+
+  ClassicElevatorTest expect(Command command, int count, int ith) {
+    return expect(command, ith + "th command on " + count + " not as expected");
+  }
+
+  private ClassicElevatorTest expect(Command command, String description) {
+    assertThat(e.nextCommand()).as(description).isEqualTo(command);
     return this;
   }
 

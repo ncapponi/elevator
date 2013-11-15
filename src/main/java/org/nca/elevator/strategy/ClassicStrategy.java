@@ -43,8 +43,16 @@ public class ClassicStrategy implements ElevatorStrategy {
   }
 
   private boolean hasSomeUserForThisFloor(ElevatorState e) {
-    return e.hasElevatorUserForCurrentFloor() || e.hasWaitingUserForCurrentFloorInCurrentDirection() ||
+    if (e.hasElevatorUserForCurrentFloor()) {
+      return true;
+    }
+    if (e.isCabinFull()) {
+      // If the cabin is full then no need to open the door on that floor even if some users are waiting.
+      return false;
+    }
+    return e.hasWaitingUserForCurrentFloorInCurrentDirection() ||
         (e.hasWaitingUserForCurrentFloor() && !e.hasUsersInCurrentDirection());
+
   }
 
   private boolean wasNotClosedJustBefore(ElevatorState e) {
