@@ -17,6 +17,19 @@ public class ClassicElevatorTest {
   Elevator e = new Elevator(new ClassicStrategy());
 
   @Test
+  public void cabinIsFull() throws Exception {
+    numberOfFloors(1, 3);
+    
+    // 2 users : not full
+    enter().enter();
+    assertThat(e.isCabinFull()).isEqualTo(false);
+
+    // One more user : cabin is full !
+    enter();
+    assertThat(e.isCabinFull()).isEqualTo(true);
+  }
+  
+  @Test
   public void oneUserGoUp() throws Exception {
     numberOfFloors(5);
 
@@ -82,7 +95,11 @@ public class ClassicElevatorTest {
 
   // From here, Helper methods to write the scenarios
   ClassicElevatorTest numberOfFloors(int numberOfFloors) {
-    e.reset(0, numberOfFloors - 1, 30);
+    return numberOfFloors(numberOfFloors, 30);
+  }
+
+  ClassicElevatorTest numberOfFloors(int numberOfFloors, int cabinSize) {
+    e.reset(0, numberOfFloors - 1, cabinSize);
     return this;
   }
 

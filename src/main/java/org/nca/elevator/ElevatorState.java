@@ -38,4 +38,6 @@ public interface ElevatorState {
 
   String getStateAsString();
 
+  boolean isCabinFull();
+
 }

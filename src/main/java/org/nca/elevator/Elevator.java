@@ -243,9 +243,12 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   public Elevator userHasEntered() {
-      WaitingUser user = waitingUsers.popUser(currentFloor);
-      elevatorUsers.userEntered(user);
-      logger.info("User has entered, added " + user);
+    if (isCabinFull()) {
+      logger.error("The cabin is full : no user should enter"); // TODO : use an Exception
+    }
+    WaitingUser user = waitingUsers.popUser(currentFloor);
+    elevatorUsers.userEntered(user);
+    logger.info("User has entered, added " + user);
     return this;
   }
 
@@ -468,6 +471,11 @@ public class Elevator implements ElevatorState, ElevatorController {
     return "Ticks: " + getTotalTicks() + "/" + waitingUsers.getAverageTicksPerUser() + "/" + elevatorUsers.getAverageTicksPerUser() +
             ", Floor=" + currentFloor + ", Dir=" + currentDirection + ", Door=" + doorState +
             ", WAIT " + waitingUsers + ", ELEV " + elevatorUsers;
+  }
+
+  @Override
+  public boolean isCabinFull() {
+    return nbUsersInElevator() >= getCabinSize();
   }
 
 }
