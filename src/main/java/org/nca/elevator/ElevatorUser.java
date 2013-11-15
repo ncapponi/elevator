@@ -50,7 +50,7 @@ class ElevatorUser implements Comparable<ElevatorUser> {
         if (!hasExitFloor()) {
             exitFloor = floor;
             if (direction==Direction.NONE) {
-              direction = exitFloor > entryFloor ? Direction.UP : direction.DOWN;
+              direction = exitFloor > entryFloor ? Direction.UP : Direction.DOWN;
             }
         } else {
             logger.error("Error : Can't set exit twice for elevator user: {}, at floor {}", this, floor);
