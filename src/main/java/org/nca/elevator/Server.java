@@ -42,20 +42,24 @@ public class Server {
             String ipAddress = "localhost";
             int port = 8080;
             String strategy = "ClassicStrategy";
+            String optimization = "NONE";
 
-            if (args.length == 3) {
+            if (args.length >= 3) {
                 ipAddress = args[0];
                 if (ipAddress.equals("find")) {
                     ipAddress = InetAddress.getLocalHost().getHostAddress();
                 }
                 port = Integer.valueOf(args[1]);
                 strategy = args[2];
+                if (args.length > 3) {
+                  optimization = args[3];
+                }
             }
             String strategyClass = "org.nca.elevator.strategy." + strategy;
 
-            logger.info("Launch Elevator Server on address {}, port {}, using strategy {}",
-                    ipAddress, port, strategyClass);
-            new Server(ipAddress, port).startElevator(strategyClass);
+            logger.info("Launch Elevator Server on address {}, port {}, using strategy {} with optimization {}",
+                    ipAddress, port, strategyClass, optimization);
+            new Server(ipAddress, port).startElevator(strategyClass, optimization);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -69,11 +73,15 @@ public class Server {
 
     }
 
-    void startElevator(String strategyClass) throws Exception {
+    void startElevator(String strategyClass, String optimizationName) throws Exception {
         setIpAddress(ipAddress);
         setPort(port);
         ElevatorStrategy strategy = (ElevatorStrategy) Class.forName(strategyClass).newInstance();
-        final Elevator elevator = new Elevator(strategy);
+        Optimization optimization = Optimization.valueOf(optimizationName);
+        if (optimization == null) {
+          optimization = Optimization.NONE;
+        }
+        final Elevator elevator = new Elevator(strategy, optimization);
         defineFilters(elevator);
         defineRoutes(elevator);
         defineFeedbackRoutes(elevator);
@@ -88,11 +96,12 @@ public class Server {
                     String entries = request.queryParams("entries");
                     int numberOfEntries = entries == null ? 1 : Integer.valueOf(entries);
                     response.type("text/html");
-                    result = "<p>GRElevator v. " + VERSION
-                            + "</p>" + "<p>Using strategy: " + elevator.getStrategy().getName()
-                            + " and optimization: " + elevator.getOptimization() + ".</p>"
-                            + "<p><b>State</b> :"
-                            + elevator.getHistoryAsHtml(numberOfEntries) + "</p>";
+                    result = "<p>GRElevator v. " + VERSION + "</p>" 
+                        + "<p> lowerFloor :" + elevator.getLowerFloor() + " higherFloor :" + elevator.getHigherFloor() + " cabinSize :" + elevator.getCabinSize() + "</p>"
+                        + "<p>Using strategy: " + elevator.getStrategy().getName()
+                        + " and optimization: " + elevator.getOptimization() + ".</p>"
+                        + "<p><b>State</b> :"
+                        + elevator.getHistoryAsHtml(numberOfEntries) + "</p>";
                 } catch (Exception e) {
                     result = e.getMessage();
                 }
