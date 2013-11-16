@@ -196,6 +196,10 @@ public class Elevator implements ElevatorState, ElevatorController {
 
   }
 
+  public int getLowerFloor() {
+    return lowerFloor;
+  }
+
   public int getHigherFloor() {
     return higherFloor;
   }
