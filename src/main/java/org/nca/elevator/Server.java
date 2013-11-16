@@ -52,7 +52,7 @@ public class Server {
                 port = Integer.valueOf(args[1]);
                 strategy = args[2];
                 if (args.length > 3) {
-                  optimization = args[3];
+                    optimization = args[3];
                 }
             }
             String strategyClass = "org.nca.elevator.strategy." + strategy;
@@ -79,7 +79,7 @@ public class Server {
         ElevatorStrategy strategy = (ElevatorStrategy) Class.forName(strategyClass).newInstance();
         Optimization optimization = Optimization.valueOf(optimizationName);
         if (optimization == null) {
-          optimization = Optimization.NONE;
+            optimization = Optimization.NONE;
         }
         final Elevator elevator = new Elevator(strategy, optimization);
         defineFilters(elevator);
@@ -97,11 +97,11 @@ public class Server {
                     int numberOfEntries = entries == null ? 1 : Integer.valueOf(entries);
                     response.type("text/html");
                     result = "<p>GRElevator v. " + VERSION + "</p>" 
-                        + "<p> lowerFloor :" + elevator.getLowerFloor() + " higherFloor :" + elevator.getHigherFloor() + " cabinSize :" + elevator.getCabinSize() + "</p>"
-                        + "<p>Using strategy: " + elevator.getStrategy().getName()
-                        + " and optimization: " + elevator.getOptimization() + ".</p>"
-                        + "<p><b>State</b> :"
-                        + elevator.getHistoryAsHtml(numberOfEntries) + "</p>";
+                            + "<p> lowerFloor :" + elevator.getLowerFloor() + " higherFloor :" + elevator.getHigherFloor() + " cabinSize :" + elevator.getCabinSize() + "</p>"
+                            + "<p>Using strategy: " + elevator.getStrategy().getName()
+                            + " and optimization: " + elevator.getOptimization() + ".</p>"
+                            + "<p><b>State</b> :"
+                            + elevator.getHistoryAsHtml(numberOfEntries) + "</p>";
                 } catch (Exception e) {
                     result = e.getMessage();
                 }
