@@ -16,6 +16,10 @@ public class ClassicStrategy implements ElevatorStrategy {
 
   @Override
   public Command nextCommand(ElevatorState e, ElevatorController c) {
+    if (e.isCabinFull()) {
+      // if the cabin is full and there is no user in the elevator for that floor
+      return Command.NEED_RESET;
+    }
     Command command = null;
     if (e.hasDoorClosed()) {
       if (wasNotClosedJustBefore(e) && hasSomeUserForThisFloor(e)) {
