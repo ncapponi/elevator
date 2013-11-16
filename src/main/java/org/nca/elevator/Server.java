@@ -112,16 +112,45 @@ public class Server {
         get(new Route("/strategy") {
             @Override
             public Object handle(Request request, Response response) {
-                String klass = "org.nca.elevator.strategy." + request.queryParams("klass");
                 try {
-                    ElevatorStrategy strategy = (ElevatorStrategy) Class.forName(klass)
-                            .newInstance();
+                    String klass = "org.nca.elevator.strategy." + request.queryParams("klass");
+                    ElevatorStrategy strategy = (ElevatorStrategy) Class.forName(klass).newInstance();
                     elevator.setStrategy(strategy);
+                    return "Strategy successfully changed to " + klass;
                 } catch (Exception e) {
+                    response.status(500);
                     logger.error("Unable to change the strategy : {}", e.toString());
-                    return "Strategy change failed";
+                    return "Strategy change failed: " + e.getMessage();
                 }
-                return "Strategy successfully changed to " + klass;
+            }
+        });
+
+        get(new Route("/optimization") {
+            @Override
+            public Object handle(Request request, Response response) {
+                String name = request.queryParams("name");
+                Optimization optimization = Optimization.valueOf(name);
+                if (optimization == null) {
+                    response.status(404);
+                    return "No optimization found for " + name;
+                }
+                try {
+                    elevator.setOptimization(optimization);
+                    return "Optimization successfully changed to " + optimization;
+                } catch (Exception e) {
+                    response.status(500);
+                    logger.error("Unable to change the optimization: {}", e.toString());
+                    return "Optimization change failed: " + e.getMessage();
+                }
+            }
+        });
+
+        get(new Route("/forceReset") {
+            @Override
+            public Object handle(Request request, Response response) {
+                // So the next Command will be a RESET
+                isServerInitialized = false;
+                return "";
             }
         });
 
