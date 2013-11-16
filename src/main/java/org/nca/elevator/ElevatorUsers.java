@@ -101,7 +101,7 @@ class ElevatorUsers {
         case POINTS:
             int points = nbPointsEarnedForFloor(floor);
             if (points <= 0) {
-                logger.info("Ignoring elevator user at floor because no positive points {}", points);
+                logger.info("Ignoring elevator user at floor {} because no positive points {}", floor, points);
             }
             return points > 0;
         case NONE:
