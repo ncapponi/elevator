@@ -60,7 +60,7 @@ public class Elevator implements ElevatorState, ElevatorController {
   }
 
   public static enum Command {
-    NOTHING, OPEN, CLOSE, UP, DOWN, NEED_RESET;
+    NOTHING, OPEN, CLOSE, UP, DOWN;
   }
 
   static enum Direction {
