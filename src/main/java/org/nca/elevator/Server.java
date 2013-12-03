@@ -153,20 +153,6 @@ public class Server {
                 return "";
             }
         });
-
-        get(new Route("/optimization") {
-            @Override
-            public Object handle(Request request, Response response) {
-                String optim = request.queryParams("value");
-                try {
-                    elevator.setOptimization(Optimization.valueOf(optim));
-                } catch (Exception e) {
-                    logger.error("Unable to change the optimization : {}", e.toString());
-                    return "Optimization change failed";
-                }
-                return "Optimization successfully changed to " + optim;
-            }
-        });
     }
 
     private void defineRoutes(final Elevator elevator) {
